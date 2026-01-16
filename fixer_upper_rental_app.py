@@ -3,43 +3,6 @@ import streamlit as st
 # ================= PAGE CONFIG =================
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
 
-# ================= THEME STATE =================
-if "theme" not in st.session_state:
-    st.session_state.theme = "light"
-
-def toggle_theme():
-    st.session_state.theme = "dark" if st.session_state.theme == "light" else "light"
-
-# ================= THEME BUTTON =================
-st.button(
-    "🌙 Dark Mode" if st.session_state.theme == "light" else "🌞 Light Mode",
-    on_click=toggle_theme
-)
-
-# ================= THEME STYLES =================
-if st.session_state.theme == "dark":
-    st.markdown(
-        """
-        <style>
-        .stApp { background-color: #000000 !important; color: #ffffff !important; }
-        label, .stMarkdown, .stMetric { color: #ffffff !important; }
-        input, textarea { background-color: #111111 !important; color: #ffffff !important; }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-else:
-    st.markdown(
-        """
-        <style>
-        .stApp { background-color: #ffffff !important; color: #000000 !important; }
-        label, .stMarkdown, .stMetric { color: #000000 !important; }
-        input, textarea { background-color: #ffffff !important; color: #000000 !important; }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
 # ================= TITLE =================
 st.title("🏚️ Fixer-Upper Rental Deal Analyzer")
 
@@ -77,7 +40,7 @@ if analyze:
     vacancy_loss = annual_rent * vacancy_rate
     management_cost = annual_rent * management_fee
 
-    expense_breakdown = {
+    expense_breakdown_annual = {
         "Property Tax": property_tax,
         "Insurance": insurance,
         "Maintenance": maintenance,
@@ -85,9 +48,9 @@ if analyze:
         "Management Fee": management_cost
     }
 
-    total_operating_expenses = sum(expense_breakdown.values())
+    total_operating_expenses_annual = sum(expense_breakdown_annual.values())
 
-    noi = annual_rent - total_operating_expenses
+    noi_annual = annual_rent - total_operating_expenses_annual
 
     loan_amount = purchase_price * (1 - down_payment_pct)
     cash_invested = purchase_price * down_payment_pct + rehab_cost
@@ -105,10 +68,10 @@ if analyze:
         monthly_payment = loan_amount / total_payments
 
     annual_debt = monthly_payment * 12
-    cash_flow = noi - annual_debt
+    cash_flow_annual = noi_annual - annual_debt
 
-    cap_rate = noi / total_investment if total_investment else 0
-    coc_return = cash_flow / cash_invested if cash_invested else 0
+    cap_rate = noi_annual / total_investment if total_investment else 0
+    coc_return = cash_flow_annual / cash_invested if cash_invested else 0
     equity_pct = (arv - total_investment) / arv if arv else 0
 
     deal_score = min(
@@ -128,16 +91,23 @@ if analyze:
         rating = "❌ Weak Deal"
 
     st.session_state.results = {
-        "NOI": noi,
-        "Cash Flow": cash_flow,
+        "Annual Rent": annual_rent,
+        "Monthly Rent": monthly_rent,
+        "NOI Annual": noi_annual,
+        "NOI Monthly": noi_annual / 12,
+        "Cash Flow Annual": cash_flow_annual,
+        "Cash Flow Monthly": cash_flow_annual / 12,
+        "Debt Annual": annual_debt,
+        "Debt Monthly": monthly_payment,
         "Cap Rate": cap_rate,
         "CoC": coc_return,
         "Equity": equity_pct,
         "Score": deal_score,
         "Rating": rating,
-        "Annual Rent": annual_rent,
-        "Expenses": expense_breakdown,
-        "Total Expenses": total_operating_expenses
+        "Expenses Annual": expense_breakdown_annual,
+        "Expenses Monthly": {k: v / 12 for k, v in expense_breakdown_annual.items()},
+        "Total Expenses Annual": total_operating_expenses_annual,
+        "Total Expenses Monthly": total_operating_expenses_annual / 12
     }
 
 # ================= RIGHT COLUMN =================
@@ -147,21 +117,42 @@ with right_col:
     if "results" in st.session_state:
         r = st.session_state.results
 
-        st.metric("NOI", f"${r['NOI']:,.0f}")
-        st.metric("Annual Cash Flow", f"${r['Cash Flow']:,.0f}")
+        view = st.radio(
+            "View Mode",
+            ["Annual", "Monthly"],
+            horizontal=True
+        )
+
+        if view == "Annual":
+            st.metric("Gross Rent", f"${r['Annual Rent']:,.0f}")
+            st.metric("NOI", f"${r['NOI Annual']:,.0f}")
+            st.metric("Cash Flow", f"${r['Cash Flow Annual']:,.0f}")
+            st.metric("Debt Service", f"${r['Debt Annual']:,.0f}")
+            expenses = r["Expenses Annual"]
+            total_exp = r["Total Expenses Annual"]
+            rent_base = r["Annual Rent"]
+        else:
+            st.metric("Gross Rent", f"${r['Monthly Rent']:,.0f}")
+            st.metric("NOI", f"${r['NOI Monthly']:,.0f}")
+            st.metric("Cash Flow", f"${r['Cash Flow Monthly']:,.0f}")
+            st.metric("Debt Service", f"${r['Debt Monthly']:,.0f}")
+            expenses = r["Expenses Monthly"]
+            total_exp = r["Total Expenses Monthly"]
+            rent_base = r["Monthly Rent"]
+
         st.metric("Cap Rate", f"{r['Cap Rate']:.2%}")
         st.metric("Cash-on-Cash Return", f"{r['CoC']:.2%}")
         st.metric("Equity Percentage", f"{r['Equity']:.2%}")
         st.metric("Rental Deal Score", f"{r['Score']:.0f}/100")
         st.subheader(r["Rating"])
 
-        st.markdown("### 💸 Expense Breakdown (Annual)")
+        st.markdown("### 💸 Expense Breakdown")
 
-        for name, value in r["Expenses"].items():
-            pct = (value / r["Annual Rent"] * 100) if r["Annual Rent"] else 0
+        for name, value in expenses.items():
+            pct = (value / rent_base * 100) if rent_base else 0
             st.write(f"**{name}**: ${value:,.0f} ({pct:.1f}%)")
 
-        st.write(f"**Total Operating Expenses:** ${r['Total Expenses']:,.0f}")
+        st.write(f"**Total Operating Expenses:** ${total_exp:,.0f}")
 
     else:
         st.info("Enter inputs and click **Analyze Deal**")
