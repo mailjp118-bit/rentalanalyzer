@@ -21,19 +21,9 @@ if st.session_state.theme == "dark":
     st.markdown(
         """
         <style>
-        .stApp {
-            background-color: #000000 !important;
-            color: #ffffff !important;
-        }
-
-        label, .stMarkdown, .stMetric {
-            color: #ffffff !important;
-        }
-
-        input, textarea {
-            background-color: #111111 !important;
-            color: #ffffff !important;
-        }
+        .stApp { background-color: #000000 !important; color: #ffffff !important; }
+        label, .stMarkdown, .stMetric { color: #ffffff !important; }
+        input, textarea { background-color: #111111 !important; color: #ffffff !important; }
         </style>
         """,
         unsafe_allow_html=True
@@ -42,19 +32,9 @@ else:
     st.markdown(
         """
         <style>
-        .stApp {
-            background-color: #ffffff !important;
-            color: #000000 !important;
-        }
-
-        label, .stMarkdown, .stMetric {
-            color: #000000 !important;
-        }
-
-        input, textarea {
-            background-color: #ffffff !important;
-            color: #000000 !important;
-        }
+        .stApp { background-color: #ffffff !important; color: #000000 !important; }
+        label, .stMarkdown, .stMetric { color: #000000 !important; }
+        input, textarea { background-color: #ffffff !important; color: #000000 !important; }
         </style>
         """,
         unsafe_allow_html=True
@@ -97,15 +77,17 @@ if analyze:
     vacancy_loss = annual_rent * vacancy_rate
     management_cost = annual_rent * management_fee
 
-    operating_expenses = (
-        property_tax +
-        insurance +
-        maintenance +
-        vacancy_loss +
-        management_cost
-    )
+    expense_breakdown = {
+        "Property Tax": property_tax,
+        "Insurance": insurance,
+        "Maintenance": maintenance,
+        "Vacancy Loss": vacancy_loss,
+        "Management Fee": management_cost
+    }
 
-    noi = annual_rent - operating_expenses
+    total_operating_expenses = sum(expense_breakdown.values())
+
+    noi = annual_rent - total_operating_expenses
 
     loan_amount = purchase_price * (1 - down_payment_pct)
     cash_invested = purchase_price * down_payment_pct + rehab_cost
@@ -152,7 +134,10 @@ if analyze:
         "CoC": coc_return,
         "Equity": equity_pct,
         "Score": deal_score,
-        "Rating": rating
+        "Rating": rating,
+        "Annual Rent": annual_rent,
+        "Expenses": expense_breakdown,
+        "Total Expenses": total_operating_expenses
     }
 
 # ================= RIGHT COLUMN =================
@@ -161,6 +146,7 @@ with right_col:
 
     if "results" in st.session_state:
         r = st.session_state.results
+
         st.metric("NOI", f"${r['NOI']:,.0f}")
         st.metric("Annual Cash Flow", f"${r['Cash Flow']:,.0f}")
         st.metric("Cap Rate", f"{r['Cap Rate']:.2%}")
@@ -168,6 +154,15 @@ with right_col:
         st.metric("Equity Percentage", f"{r['Equity']:.2%}")
         st.metric("Rental Deal Score", f"{r['Score']:.0f}/100")
         st.subheader(r["Rating"])
+
+        st.markdown("### 💸 Expense Breakdown (Annual)")
+
+        for name, value in r["Expenses"].items():
+            pct = (value / r["Annual Rent"] * 100) if r["Annual Rent"] else 0
+            st.write(f"**{name}**: ${value:,.0f} ({pct:.1f}%)")
+
+        st.write(f"**Total Operating Expenses:** ${r['Total Expenses']:,.0f}")
+
     else:
         st.info("Enter inputs and click **Analyze Deal**")
 
