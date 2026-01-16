@@ -3,6 +3,14 @@ import streamlit as st
 # ================= PAGE CONFIG =================
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
 
+# ================= PRIVACY MESSAGE =================
+st.markdown(
+    """
+    🔒 **Privacy Notice:**  
+    *We do not store or track your deal data. All calculations are performed in real-time and reset when you refresh the page.*
+    """
+)
+
 st.title("🏚️ Fixer-Upper Rental Deal Analyzer")
 
 # ================= LAYOUT =================
@@ -57,7 +65,6 @@ if analyze:
     noi_annual = annual_rent - total_expenses_annual
 
     loan_amount = purchase_price * (1 - down_payment_pct)
-    cash_invested = purchase_price * down_payment_pct + rehab_cost
 
     monthly_rate = interest_rate / 12
     total_payments = loan_term * 12
@@ -73,6 +80,8 @@ if analyze:
     cash_flow_annual = noi_annual - annual_debt
 
     total_investment = purchase_price + rehab_cost
+    cash_invested = purchase_price * down_payment_pct + rehab_cost
+
     cap_rate = noi_annual / total_investment if total_investment else 0
     coc_return = cash_flow_annual / cash_invested if cash_invested else 0
     equity_pct = (arv - total_investment) / arv if arv else 0
@@ -91,17 +100,19 @@ if analyze:
         "❌ Weak Deal"
     )
 
-    # OPTION 4 — CASH AT CLOSING
+    # ================= OPTION 4: CASH REQUIRED AT CLOSING =================
     down_payment = purchase_price * down_payment_pct
     closing_costs = purchase_price * closing_cost_pct
     total_cash_needed = down_payment + rehab_cost + closing_costs
     cash_pct_arv = total_cash_needed / arv if arv else 0
 
-    st.session_state.base = {
+    st.session_state.results = {
         "Annual Rent": annual_rent,
         "Monthly Rent": monthly_rent,
         "NOI Annual": noi_annual,
         "Cash Flow Annual": cash_flow_annual,
+        "Debt Annual": annual_debt,
+        "Debt Monthly": monthly_payment,
         "Cap Rate": cap_rate,
         "CoC": coc_return,
         "Equity": equity_pct,
@@ -109,11 +120,9 @@ if analyze:
         "Rating": rating,
         "Expenses Annual": expenses_annual,
         "Total Expenses Annual": total_expenses_annual,
-        "Debt Annual": annual_debt,
-        "Debt Monthly": monthly_payment,
-        "Cash Needed": total_cash_needed,
         "Down Payment": down_payment,
         "Closing Costs": closing_costs,
+        "Total Cash Needed": total_cash_needed,
         "Cash % ARV": cash_pct_arv
     }
 
@@ -121,8 +130,8 @@ if analyze:
 with right_col:
     st.header("📈 Deal Results")
 
-    if "base" in st.session_state:
-        r = st.session_state.base
+    if "results" in st.session_state:
+        r = st.session_state.results
 
         view = st.radio("View Mode", ["Annual", "Monthly"], horizontal=True)
 
@@ -132,60 +141,38 @@ with right_col:
             cash_flow = r["Cash Flow Annual"]
             debt = r["Debt Annual"]
             expenses = r["Expenses Annual"]
+            total_exp = r["Total Expenses Annual"]
         else:
             rent = r["Monthly Rent"]
             noi = r["NOI Annual"] / 12
             cash_flow = r["Cash Flow Annual"] / 12
             debt = r["Debt Monthly"]
             expenses = {k: v / 12 for k, v in r["Expenses Annual"].items()}
+            total_exp = r["Total Expenses Annual"] / 12
 
         st.metric("Gross Rent", f"${rent:,.0f}")
         st.metric("NOI", f"${noi:,.0f}")
         st.metric("Cash Flow", f"${cash_flow:,.0f}")
         st.metric("Debt Service", f"${debt:,.0f}")
         st.metric("Cap Rate", f"{r['Cap Rate']:.2%}")
-        st.metric("Cash-on-Cash", f"{r['CoC']:.2%}")
-        st.metric("Equity", f"{r['Equity']:.2%}")
-        st.metric("Deal Score", f"{r['Score']:.0f}/100")
+        st.metric("Cash-on-Cash Return", f"{r['CoC']:.2%}")
+        st.metric("Equity Percentage", f"{r['Equity']:.2%}")
+        st.metric("Rental Deal Score", f"{r['Score']:.0f}/100")
         st.subheader(r["Rating"])
 
-        # OPTION 4 DISPLAY
+        st.markdown("### 💸 Expense Breakdown")
+        for name, value in expenses.items():
+            pct = (value / rent * 100) if rent else 0
+            st.write(f"**{name}**: ${value:,.0f} ({pct:.1f}%)")
+
+        st.write(f"**Total Operating Expenses:** ${total_exp:,.0f}")
+
         st.markdown("### 💰 Cash Required at Closing")
         st.write(f"Down Payment: ${r['Down Payment']:,.0f}")
         st.write(f"Rehab Budget: ${rehab_cost:,.0f}")
         st.write(f"Closing Costs: ${r['Closing Costs']:,.0f}")
-        st.write(f"**Total Cash Needed:** ${r['Cash Needed']:,.0f}")
+        st.write(f"**Total Cash Needed:** ${r['Total Cash Needed']:,.0f}")
         st.write(f"Cash Needed as % of ARV: {r['Cash % ARV']:.1%}")
-
-        # OPTION 3 — SENSITIVITY ANALYSIS
-        st.markdown("### 🔍 Sensitivity Analysis")
-
-        rent_adj = st.slider("Rent Change (%)", -20, 20, 0)
-        price_adj = st.slider("Purchase Price Change (%)", -20, 20, 0)
-        rate_adj = st.slider("Interest Rate Change (%)", -2, 2, 0)
-
-        adj_rent = rent * (1 + rent_adj / 100)
-        adj_price = purchase_price * (1 + price_adj / 100)
-        adj_rate = interest_rate + rate_adj / 100
-
-        adj_noi = (adj_rent * (12 if view == "Monthly" else 1)) - r["Total Expenses Annual"]
-        adj_loan = adj_price * (1 - down_payment_pct)
-        adj_monthly_rate = adj_rate / 12
-
-        if adj_rate > 0:
-            adj_payment = adj_loan * (
-                adj_monthly_rate * (1 + adj_monthly_rate) ** (loan_term * 12)
-            ) / ((1 + adj_monthly_rate) ** (loan_term * 12) - 1)
-        else:
-            adj_payment = adj_loan / (loan_term * 12)
-
-        adj_cash_flow = adj_noi - (adj_payment * 12)
-        adj_cap = adj_noi / (adj_price + rehab_cost) if adj_price else 0
-        adj_coc = adj_cash_flow / r["Cash Needed"] if r["Cash Needed"] else 0
-
-        st.write(f"Adjusted Cash Flow: ${adj_cash_flow:,.0f}")
-        st.write(f"Adjusted Cap Rate: {adj_cap:.2%}")
-        st.write(f"Adjusted CoC Return: {adj_coc:.2%}")
 
     else:
         st.info("Enter inputs and click **Analyze Deal**")
@@ -194,5 +181,5 @@ with right_col:
 st.markdown("---")
 st.caption(
     "Disclaimer: This tool is provided for educational and informational purposes only and does not constitute "
-    "financial, investment, legal, or tax advice. Estimates only. Consult licensed professionals in the US or Canada."
+    "financial, investment, legal, or tax advice. Estimates only. Consult licensed professionals in the United States or Canada."
 )
