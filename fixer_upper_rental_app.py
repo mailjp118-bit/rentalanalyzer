@@ -1,17 +1,27 @@
 import streamlit as st
+import pandas as pd
+from io import BytesIO
+from reportlab.platypus import SimpleDocTemplate, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
+from openpyxl import Workbook
 
 # ================= PAGE CONFIG =================
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
 
 # ================= PRIVACY MESSAGE =================
 st.markdown(
-    """
-    🔒 **Privacy Notice:**  
-    *We do not store or track your deal data. All calculations are performed in real-time and reset when you refresh the page.*
-    """
+    "🔒 **Privacy Notice:** *We do not store or track your deal data. "
+    "All calculations run in real-time and reset when you refresh the page.*"
 )
 
-st.title("🏚️ Fixer-Upper Rental Deal Analyzer")
+# ================= HEADER + DOWNLOAD AREA =================
+title_col, download_col = st.columns([3, 1])
+with title_col:
+    st.title("🏚️ Fixer-Upper Rental Deal Analyzer")
+
+# Placeholder containers for download buttons
+pdf_placeholder = download_col.empty()
+excel_placeholder = download_col.empty()
 
 # ================= LAYOUT =================
 left_col, right_col = st.columns([1, 1])
@@ -30,7 +40,12 @@ with left_col:
     insurance = st.number_input("Annual Insurance ($)", min_value=0.0)
     maintenance = st.number_input("Annual Maintenance ($)", min_value=0.0)
 
-    vacancy_rate = st.number_input("Vacancy Rate (%)", 0.0, 100.0) / 100
+    vacancy_rate = st.number_input(
+        "Vacancy Rate (%)",
+        0.0, 100.0,
+        help="Vacancy accounts for time when the property is empty or tenants don’t pay."
+    ) / 100
+
     management_fee = st.number_input("Management Fee (%)", 0.0, 100.0) / 100
 
     down_payment_pct = st.number_input("Down Payment (%)", 0.0, 100.0) / 100
@@ -39,9 +54,7 @@ with left_col:
 
     closing_cost_pct = st.number_input(
         "Estimated Closing Costs (% of Purchase Price)",
-        min_value=0.0,
-        max_value=10.0,
-        value=3.0
+        0.0, 10.0, value=3.0
     ) / 100
 
     analyze = st.button("📊 Analyze Deal")
@@ -53,7 +66,7 @@ if analyze:
     vacancy_loss = annual_rent * vacancy_rate
     management_cost = annual_rent * management_fee
 
-    expenses_annual = {
+    expenses = {
         "Property Tax": property_tax,
         "Insurance": insurance,
         "Maintenance": maintenance,
@@ -61,11 +74,10 @@ if analyze:
         "Management Fee": management_cost
     }
 
-    total_expenses_annual = sum(expenses_annual.values())
-    noi_annual = annual_rent - total_expenses_annual
+    total_expenses = sum(expenses.values())
+    noi = annual_rent - total_expenses
 
     loan_amount = purchase_price * (1 - down_payment_pct)
-
     monthly_rate = interest_rate / 12
     total_payments = loan_term * 12
 
@@ -77,20 +89,20 @@ if analyze:
         monthly_payment = loan_amount / total_payments
 
     annual_debt = monthly_payment * 12
-    cash_flow_annual = noi_annual - annual_debt
+    cash_flow = noi - annual_debt
 
     total_investment = purchase_price + rehab_cost
     cash_invested = purchase_price * down_payment_pct + rehab_cost
 
-    cap_rate = noi_annual / total_investment if total_investment else 0
-    coc_return = cash_flow_annual / cash_invested if cash_invested else 0
-    equity_pct = (arv - total_investment) / arv if arv else 0
+    cap_rate = noi / total_investment if total_investment else 0
+    coc = cash_flow / cash_invested if cash_invested else 0
+    equity = (arv - total_investment) / arv if arv else 0
 
     deal_score = min(
         100,
-        (coc_return / 0.15 * 40) +
+        (coc / 0.15 * 40) +
         (cap_rate / 0.10 * 30) +
-        (equity_pct / 0.20 * 30)
+        (equity / 0.20 * 30)
     )
 
     rating = (
@@ -100,31 +112,68 @@ if analyze:
         "❌ Weak Deal"
     )
 
-    # ================= OPTION 4: CASH REQUIRED AT CLOSING =================
     down_payment = purchase_price * down_payment_pct
     closing_costs = purchase_price * closing_cost_pct
-    total_cash_needed = down_payment + rehab_cost + closing_costs
-    cash_pct_arv = total_cash_needed / arv if arv else 0
+    cash_needed = down_payment + rehab_cost + closing_costs
 
     st.session_state.results = {
         "Annual Rent": annual_rent,
-        "Monthly Rent": monthly_rent,
-        "NOI Annual": noi_annual,
-        "Cash Flow Annual": cash_flow_annual,
-        "Debt Annual": annual_debt,
-        "Debt Monthly": monthly_payment,
+        "NOI": noi,
+        "Cash Flow": cash_flow,
+        "Debt": annual_debt,
         "Cap Rate": cap_rate,
-        "CoC": coc_return,
-        "Equity": equity_pct,
+        "CoC": coc,
+        "Equity": equity,
         "Score": deal_score,
         "Rating": rating,
-        "Expenses Annual": expenses_annual,
-        "Total Expenses Annual": total_expenses_annual,
-        "Down Payment": down_payment,
-        "Closing Costs": closing_costs,
-        "Total Cash Needed": total_cash_needed,
-        "Cash % ARV": cash_pct_arv
+        "Expenses": expenses,
+        "Total Expenses": total_expenses,
+        "Cash Needed": cash_needed
     }
+
+    # ================= PDF GENERATION =================
+    pdf_buffer = BytesIO()
+    doc = SimpleDocTemplate(pdf_buffer)
+    styles = getSampleStyleSheet()
+    content = [
+        Paragraph("Fixer-Upper Rental Deal Summary", styles["Title"]),
+        Paragraph(f"Deal Rating: {rating}", styles["Normal"]),
+        Paragraph(f"Cap Rate: {cap_rate:.2%}", styles["Normal"]),
+        Paragraph(f"Cash-on-Cash Return: {coc:.2%}", styles["Normal"]),
+        Paragraph(f"Annual Cash Flow: ${cash_flow:,.0f}", styles["Normal"]),
+        Paragraph(f"Total Cash Needed: ${cash_needed:,.0f}", styles["Normal"]),
+    ]
+    doc.build(content)
+    pdf_buffer.seek(0)
+
+    pdf_placeholder.download_button(
+        "📄 Download PDF",
+        data=pdf_buffer,
+        file_name="rental_deal_summary.pdf",
+        mime="application/pdf"
+    )
+
+    # ================= EXCEL GENERATION =================
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Deal Summary"
+
+    ws.append(["Metric", "Value"])
+    ws.append(["Cap Rate", cap_rate])
+    ws.append(["Cash-on-Cash Return", coc])
+    ws.append(["Annual Cash Flow", cash_flow])
+    ws.append(["Total Cash Needed", cash_needed])
+
+    excel_buffer = BytesIO()
+    wb.save(excel_buffer)
+    excel_buffer.seek(0)
+
+    excel_placeholder.download_button(
+        "📊 Download Excel",
+        data=excel_buffer,
+        file_name="rental_deal_summary.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 # ================= RIGHT COLUMN =================
 with right_col:
@@ -133,53 +182,32 @@ with right_col:
     if "results" in st.session_state:
         r = st.session_state.results
 
-        view = st.radio("View Mode", ["Annual", "Monthly"], horizontal=True)
+        st.metric(
+            "Cap Rate",
+            f"{r['Cap Rate']:.2%}",
+            help="Cap Rate = NOI ÷ Total Purchase + Rehab Cost. "
+                 "It measures the property’s return ignoring financing."
+        )
 
-        if view == "Annual":
-            rent = r["Annual Rent"]
-            noi = r["NOI Annual"]
-            cash_flow = r["Cash Flow Annual"]
-            debt = r["Debt Annual"]
-            expenses = r["Expenses Annual"]
-            total_exp = r["Total Expenses Annual"]
-        else:
-            rent = r["Monthly Rent"]
-            noi = r["NOI Annual"] / 12
-            cash_flow = r["Cash Flow Annual"] / 12
-            debt = r["Debt Monthly"]
-            expenses = {k: v / 12 for k, v in r["Expenses Annual"].items()}
-            total_exp = r["Total Expenses Annual"] / 12
+        st.metric(
+            "Cash-on-Cash Return",
+            f"{r['CoC']:.2%}",
+            help="Cash-on-Cash shows how hard your actual cash investment is working."
+        )
 
-        st.metric("Gross Rent", f"${rent:,.0f}")
-        st.metric("NOI", f"${noi:,.0f}")
-        st.metric("Cash Flow", f"${cash_flow:,.0f}")
-        st.metric("Debt Service", f"${debt:,.0f}")
-        st.metric("Cap Rate", f"{r['Cap Rate']:.2%}")
-        st.metric("Cash-on-Cash Return", f"{r['CoC']:.2%}")
-        st.metric("Equity Percentage", f"{r['Equity']:.2%}")
-        st.metric("Rental Deal Score", f"{r['Score']:.0f}/100")
+        st.metric(
+            "Annual Cash Flow",
+            f"${r['Cash Flow']:,.0f}",
+            help="Cash Flow is money left after all expenses and mortgage payments."
+        )
+
         st.subheader(r["Rating"])
-
-        st.markdown("### 💸 Expense Breakdown")
-        for name, value in expenses.items():
-            pct = (value / rent * 100) if rent else 0
-            st.write(f"**{name}**: ${value:,.0f} ({pct:.1f}%)")
-
-        st.write(f"**Total Operating Expenses:** ${total_exp:,.0f}")
-
-        st.markdown("### 💰 Cash Required at Closing")
-        st.write(f"Down Payment: ${r['Down Payment']:,.0f}")
-        st.write(f"Rehab Budget: ${rehab_cost:,.0f}")
-        st.write(f"Closing Costs: ${r['Closing Costs']:,.0f}")
-        st.write(f"**Total Cash Needed:** ${r['Total Cash Needed']:,.0f}")
-        st.write(f"Cash Needed as % of ARV: {r['Cash % ARV']:.1%}")
-
     else:
         st.info("Enter inputs and click **Analyze Deal**")
 
 # ================= DISCLAIMER =================
 st.markdown("---")
 st.caption(
-    "Disclaimer: This tool is provided for educational and informational purposes only and does not constitute "
-    "financial, investment, legal, or tax advice. Estimates only. Consult licensed professionals in the United States or Canada."
+    "Disclaimer: This tool is for educational purposes only and does not constitute "
+    "financial, investment, legal, or tax advice. Consult licensed professionals in the US or Canada."
 )
