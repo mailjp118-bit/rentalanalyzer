@@ -3,7 +3,6 @@ import streamlit as st
 # ================= PAGE CONFIG =================
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
 
-# ================= TITLE =================
 st.title("🏚️ Fixer-Upper Rental Deal Analyzer")
 
 # ================= LAYOUT =================
@@ -23,24 +22,30 @@ with left_col:
     insurance = st.number_input("Annual Insurance ($)", min_value=0.0)
     maintenance = st.number_input("Annual Maintenance ($)", min_value=0.0)
 
-    vacancy_rate = st.number_input("Vacancy Rate (%)", min_value=0.0, max_value=100.0) / 100
-    management_fee = st.number_input("Management Fee (%)", min_value=0.0, max_value=100.0) / 100
+    vacancy_rate = st.number_input("Vacancy Rate (%)", 0.0, 100.0) / 100
+    management_fee = st.number_input("Management Fee (%)", 0.0, 100.0) / 100
 
-    down_payment_pct = st.number_input("Down Payment (%)", min_value=0.0, max_value=100.0) / 100
-    interest_rate = st.number_input("Interest Rate (%)", min_value=0.0, max_value=15.0) / 100
-    loan_term = st.number_input("Loan Term (Years)", min_value=1, max_value=40)
+    down_payment_pct = st.number_input("Down Payment (%)", 0.0, 100.0) / 100
+    interest_rate = st.number_input("Interest Rate (%)", 0.0, 15.0) / 100
+    loan_term = st.number_input("Loan Term (Years)", 1, 40)
+
+    closing_cost_pct = st.number_input(
+        "Estimated Closing Costs (% of Purchase Price)",
+        min_value=0.0,
+        max_value=10.0,
+        value=3.0
+    ) / 100
 
     analyze = st.button("📊 Analyze Deal")
 
 # ================= CALCULATIONS =================
 if analyze:
-    total_investment = purchase_price + rehab_cost
     annual_rent = monthly_rent * 12
 
     vacancy_loss = annual_rent * vacancy_rate
     management_cost = annual_rent * management_fee
 
-    expense_breakdown_annual = {
+    expenses_annual = {
         "Property Tax": property_tax,
         "Insurance": insurance,
         "Maintenance": maintenance,
@@ -48,9 +53,8 @@ if analyze:
         "Management Fee": management_cost
     }
 
-    total_operating_expenses_annual = sum(expense_breakdown_annual.values())
-
-    noi_annual = annual_rent - total_operating_expenses_annual
+    total_expenses_annual = sum(expenses_annual.values())
+    noi_annual = annual_rent - total_expenses_annual
 
     loan_amount = purchase_price * (1 - down_payment_pct)
     cash_invested = purchase_price * down_payment_pct + rehab_cost
@@ -59,17 +63,16 @@ if analyze:
     total_payments = loan_term * 12
 
     if interest_rate > 0:
-        monthly_payment = (
-            loan_amount *
-            (monthly_rate * (1 + monthly_rate) ** total_payments) /
-            ((1 + monthly_rate) ** total_payments - 1)
-        )
+        monthly_payment = loan_amount * (
+            monthly_rate * (1 + monthly_rate) ** total_payments
+        ) / ((1 + monthly_rate) ** total_payments - 1)
     else:
         monthly_payment = loan_amount / total_payments
 
     annual_debt = monthly_payment * 12
     cash_flow_annual = noi_annual - annual_debt
 
+    total_investment = purchase_price + rehab_cost
     cap_rate = noi_annual / total_investment if total_investment else 0
     coc_return = cash_flow_annual / cash_invested if cash_invested else 0
     equity_pct = (arv - total_investment) / arv if arv else 0
@@ -81,78 +84,108 @@ if analyze:
         (equity_pct / 0.20 * 30)
     )
 
-    if deal_score >= 85:
-        rating = "🔥 Excellent Deal"
-    elif deal_score >= 70:
-        rating = "✅ Strong Deal"
-    elif deal_score >= 50:
-        rating = "⚠️ Marginal Deal"
-    else:
-        rating = "❌ Weak Deal"
+    rating = (
+        "🔥 Excellent Deal" if deal_score >= 85 else
+        "✅ Strong Deal" if deal_score >= 70 else
+        "⚠️ Marginal Deal" if deal_score >= 50 else
+        "❌ Weak Deal"
+    )
 
-    st.session_state.results = {
+    # OPTION 4 — CASH AT CLOSING
+    down_payment = purchase_price * down_payment_pct
+    closing_costs = purchase_price * closing_cost_pct
+    total_cash_needed = down_payment + rehab_cost + closing_costs
+    cash_pct_arv = total_cash_needed / arv if arv else 0
+
+    st.session_state.base = {
         "Annual Rent": annual_rent,
         "Monthly Rent": monthly_rent,
         "NOI Annual": noi_annual,
-        "NOI Monthly": noi_annual / 12,
         "Cash Flow Annual": cash_flow_annual,
-        "Cash Flow Monthly": cash_flow_annual / 12,
-        "Debt Annual": annual_debt,
-        "Debt Monthly": monthly_payment,
         "Cap Rate": cap_rate,
         "CoC": coc_return,
         "Equity": equity_pct,
         "Score": deal_score,
         "Rating": rating,
-        "Expenses Annual": expense_breakdown_annual,
-        "Expenses Monthly": {k: v / 12 for k, v in expense_breakdown_annual.items()},
-        "Total Expenses Annual": total_operating_expenses_annual,
-        "Total Expenses Monthly": total_operating_expenses_annual / 12
+        "Expenses Annual": expenses_annual,
+        "Total Expenses Annual": total_expenses_annual,
+        "Debt Annual": annual_debt,
+        "Debt Monthly": monthly_payment,
+        "Cash Needed": total_cash_needed,
+        "Down Payment": down_payment,
+        "Closing Costs": closing_costs,
+        "Cash % ARV": cash_pct_arv
     }
 
 # ================= RIGHT COLUMN =================
 with right_col:
     st.header("📈 Deal Results")
 
-    if "results" in st.session_state:
-        r = st.session_state.results
+    if "base" in st.session_state:
+        r = st.session_state.base
 
-        view = st.radio(
-            "View Mode",
-            ["Annual", "Monthly"],
-            horizontal=True
-        )
+        view = st.radio("View Mode", ["Annual", "Monthly"], horizontal=True)
 
         if view == "Annual":
-            st.metric("Gross Rent", f"${r['Annual Rent']:,.0f}")
-            st.metric("NOI", f"${r['NOI Annual']:,.0f}")
-            st.metric("Cash Flow", f"${r['Cash Flow Annual']:,.0f}")
-            st.metric("Debt Service", f"${r['Debt Annual']:,.0f}")
+            rent = r["Annual Rent"]
+            noi = r["NOI Annual"]
+            cash_flow = r["Cash Flow Annual"]
+            debt = r["Debt Annual"]
             expenses = r["Expenses Annual"]
-            total_exp = r["Total Expenses Annual"]
-            rent_base = r["Annual Rent"]
         else:
-            st.metric("Gross Rent", f"${r['Monthly Rent']:,.0f}")
-            st.metric("NOI", f"${r['NOI Monthly']:,.0f}")
-            st.metric("Cash Flow", f"${r['Cash Flow Monthly']:,.0f}")
-            st.metric("Debt Service", f"${r['Debt Monthly']:,.0f}")
-            expenses = r["Expenses Monthly"]
-            total_exp = r["Total Expenses Monthly"]
-            rent_base = r["Monthly Rent"]
+            rent = r["Monthly Rent"]
+            noi = r["NOI Annual"] / 12
+            cash_flow = r["Cash Flow Annual"] / 12
+            debt = r["Debt Monthly"]
+            expenses = {k: v / 12 for k, v in r["Expenses Annual"].items()}
 
+        st.metric("Gross Rent", f"${rent:,.0f}")
+        st.metric("NOI", f"${noi:,.0f}")
+        st.metric("Cash Flow", f"${cash_flow:,.0f}")
+        st.metric("Debt Service", f"${debt:,.0f}")
         st.metric("Cap Rate", f"{r['Cap Rate']:.2%}")
-        st.metric("Cash-on-Cash Return", f"{r['CoC']:.2%}")
-        st.metric("Equity Percentage", f"{r['Equity']:.2%}")
-        st.metric("Rental Deal Score", f"{r['Score']:.0f}/100")
+        st.metric("Cash-on-Cash", f"{r['CoC']:.2%}")
+        st.metric("Equity", f"{r['Equity']:.2%}")
+        st.metric("Deal Score", f"{r['Score']:.0f}/100")
         st.subheader(r["Rating"])
 
-        st.markdown("### 💸 Expense Breakdown")
+        # OPTION 4 DISPLAY
+        st.markdown("### 💰 Cash Required at Closing")
+        st.write(f"Down Payment: ${r['Down Payment']:,.0f}")
+        st.write(f"Rehab Budget: ${rehab_cost:,.0f}")
+        st.write(f"Closing Costs: ${r['Closing Costs']:,.0f}")
+        st.write(f"**Total Cash Needed:** ${r['Cash Needed']:,.0f}")
+        st.write(f"Cash Needed as % of ARV: {r['Cash % ARV']:.1%}")
 
-        for name, value in expenses.items():
-            pct = (value / rent_base * 100) if rent_base else 0
-            st.write(f"**{name}**: ${value:,.0f} ({pct:.1f}%)")
+        # OPTION 3 — SENSITIVITY ANALYSIS
+        st.markdown("### 🔍 Sensitivity Analysis")
 
-        st.write(f"**Total Operating Expenses:** ${total_exp:,.0f}")
+        rent_adj = st.slider("Rent Change (%)", -20, 20, 0)
+        price_adj = st.slider("Purchase Price Change (%)", -20, 20, 0)
+        rate_adj = st.slider("Interest Rate Change (%)", -2, 2, 0)
+
+        adj_rent = rent * (1 + rent_adj / 100)
+        adj_price = purchase_price * (1 + price_adj / 100)
+        adj_rate = interest_rate + rate_adj / 100
+
+        adj_noi = (adj_rent * (12 if view == "Monthly" else 1)) - r["Total Expenses Annual"]
+        adj_loan = adj_price * (1 - down_payment_pct)
+        adj_monthly_rate = adj_rate / 12
+
+        if adj_rate > 0:
+            adj_payment = adj_loan * (
+                adj_monthly_rate * (1 + adj_monthly_rate) ** (loan_term * 12)
+            ) / ((1 + adj_monthly_rate) ** (loan_term * 12) - 1)
+        else:
+            adj_payment = adj_loan / (loan_term * 12)
+
+        adj_cash_flow = adj_noi - (adj_payment * 12)
+        adj_cap = adj_noi / (adj_price + rehab_cost) if adj_price else 0
+        adj_coc = adj_cash_flow / r["Cash Needed"] if r["Cash Needed"] else 0
+
+        st.write(f"Adjusted Cash Flow: ${adj_cash_flow:,.0f}")
+        st.write(f"Adjusted Cap Rate: {adj_cap:.2%}")
+        st.write(f"Adjusted CoC Return: {adj_coc:.2%}")
 
     else:
         st.info("Enter inputs and click **Analyze Deal**")
@@ -161,6 +194,5 @@ with right_col:
 st.markdown("---")
 st.caption(
     "Disclaimer: This tool is provided for educational and informational purposes only and does not constitute "
-    "financial, investment, legal, or tax advice. All calculations are estimates and for illustrative purposes only. "
-    "Users should perform their own due diligence and consult with licensed professionals in the United States or Canada."
+    "financial, investment, legal, or tax advice. Estimates only. Consult licensed professionals in the US or Canada."
 )
