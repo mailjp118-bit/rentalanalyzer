@@ -192,6 +192,7 @@ with right_col:
 # ================= DISCLAIMER =================
 st.markdown("---")
 st.caption(
-    "Disclaimer: This tool is for educational purposes only and does not constitute "
-    "financial, investment, legal, or tax advice. Consult licensed professionals in the US or Canada."
+    "Disclaimer: This tool is for educational and informational purposes only and does not constitute financial, investment, legal, tax, or real estate advice.
+All results are estimates only based on user inputs. Users should conduct their own due diligence and consult licensed professionals before making any decisions."
 )
+
