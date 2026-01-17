@@ -25,11 +25,11 @@ st.markdown(
     """
 )
 
-# ================= MAIN LAYOUT =================
-left_col, mid_col, right_col = st.columns([1.2, 1, 1])
+# ================= LAYOUT =================
+col1, col2, col3 = st.columns([1.2, 1, 1])
 
-# ================= LEFT — DEAL INPUTS =================
-with left_col:
+# ================= LEFT COLUMN — DEAL INPUTS =================
+with col1:
     st.header("🔢 Deal Inputs")
 
     purchase_price = st.number_input("Purchase Price ($)", min_value=0.0, step=1000.0)
@@ -64,15 +64,11 @@ if analyze:
     vacancy_loss = annual_rent * vacancy_rate
     management_cost = annual_rent * management_fee
 
-    expenses_annual = {
-        "Property Tax": property_tax,
-        "Insurance": insurance,
-        "Maintenance": maintenance,
-        "Vacancy Loss": vacancy_loss,
-        "Management Fee": management_cost
-    }
+    total_expenses_annual = (
+        property_tax + insurance + maintenance +
+        vacancy_loss + management_cost
+    )
 
-    total_expenses_annual = sum(expenses_annual.values())
     noi_annual = annual_rent - total_expenses_annual
 
     loan_amount = purchase_price * (1 - down_payment_pct)
@@ -86,8 +82,7 @@ if analyze:
     else:
         monthly_payment = loan_amount / total_payments
 
-    annual_debt = monthly_payment * 12
-    cash_flow_annual = noi_annual - annual_debt
+    cash_flow_annual = noi_annual - (monthly_payment * 12)
 
     total_investment = purchase_price + rehab_cost
     cash_invested = purchase_price * down_payment_pct + rehab_cost
@@ -115,16 +110,16 @@ if analyze:
         "NOI Annual": noi_annual,
         "Cash Flow Annual": cash_flow_annual,
         "Cap Rate": cap_rate,
-        "CoC": coc_return,
-        "Equity": equity_pct,
+        "Cash-on-Cash Return": coc_return,
+        "Equity %": equity_pct,
         "Score": deal_score,
         "Rating": rating,
         "Vacancy Rate": vacancy_rate,
         "Down Payment %": down_payment_pct
     }
 
-# ================= MIDDLE — DEAL RESULTS =================
-with mid_col:
+# ================= MIDDLE COLUMN — DEAL RESULTS =================
+with col2:
     st.header("📈 Deal Results")
 
     if "results" in st.session_state:
@@ -134,29 +129,18 @@ with mid_col:
         st.metric("NOI", f"${r['NOI Annual']:,.0f}")
         st.metric("Cash Flow", f"${r['Cash Flow Annual']:,.0f}")
         st.metric("Cap Rate", f"{r['Cap Rate']:.2%}")
-        st.metric("Cash-on-Cash Return", f"{r['CoC']:.2%}")
-        st.metric("Equity %", f"{r['Equity']:.2%}")
+        st.metric("Cash-on-Cash", f"{r['Cash-on-Cash Return']:.2%}")
+        st.metric("Equity %", f"{r['Equity %']:.2%}")
         st.metric("Deal Score", f"{r['Score']:.0f}/100")
         st.subheader(r["Rating"])
 
-# ================= RIGHT — DEAL HEALTH =================
-with right_col:
-    st.header("🚦 Deal Health Indicators")
+        st.markdown("### 🚦 Deal Health Indicators")
 
-    if "results" in st.session_state:
-        r = st.session_state.results
-
-        st.write(f"**Cash Flow:** ${r['Cash Flow Annual']:,.0f}")
-        st.success("🟢 Positive") if r["Cash Flow Annual"] > 0 else st.error("🔴 Negative")
-
-        st.write(f"**Cap Rate:** {r['Cap Rate']:.2%}")
-        st.success("🟢 Strong") if r["Cap Rate"] >= 0.08 else st.warning("🟡 Average") if r["Cap Rate"] >= 0.06 else st.error("🔴 Weak")
-
-        st.write(f"**Cash-on-Cash:** {r['CoC']:.2%}")
-        st.success("🟢 Excellent") if r["CoC"] >= 0.12 else st.warning("🟡 Acceptable") if r["CoC"] >= 0.08 else st.error("🔴 Poor")
-
-        st.write(f"**Vacancy Rate:** {r['Vacancy Rate']:.1%}")
-        st.success("🟢 Low Risk") if r["Vacancy Rate"] <= 0.05 else st.warning("🟡 Moderate") if r["Vacancy Rate"] <= 0.10 else st.error("🔴 High Risk")
+        st.success("🟢 Cash Flow Positive") if r["Cash Flow Annual"] > 0 else st.error("🔴 Cash Flow Negative")
+        st.success("🟢 Strong Cap Rate") if r["Cap Rate"] >= 0.08 else st.warning("🟡 Weak Cap Rate")
+        st.success("🟢 Strong CoC Return") if r["Cash-on-Cash Return"] >= 0.10 else st.warning("🟡 Weak CoC")
+        st.success("🟢 Low Vacancy Risk") if r["Vacancy Rate"] <= 0.08 else st.warning("🟡 High Vacancy")
+        st.success("🟢 Conservative Leverage") if r["Down Payment %"] >= 0.20 else st.warning("🟡 Aggressive Leverage")
 
 # ================= DOWNLOAD BUTTONS =================
 if "results" in st.session_state:
@@ -180,9 +164,6 @@ if "results" in st.session_state:
     for k, v in st.session_state.results.items():
         c.drawString(40, y, f"{k}: {v}")
         y -= 18
-        if y < 50:
-            c.showPage()
-            y = 750
 
     c.save()
     pdf_buffer.seek(0)
@@ -197,5 +178,6 @@ if "results" in st.session_state:
 # ================= DISCLAIMER =================
 st.markdown("---")
 st.caption(
-    "Educational use only. Not financial, legal, or investment advice. Estimates only."
+    "Disclaimer: This tool is for educational purposes only and does not constitute financial, "
+    "investment, legal, tax, or real estate advice. Estimates only."
 )
