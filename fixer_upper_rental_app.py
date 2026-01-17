@@ -210,5 +210,9 @@ if "results" in st.session_state:
 # ================= DISCLAIMER =================
 st.markdown("---")
 st.caption(
-    "Disclaimer: This tool is for educational purposes only and does not constitute financial or investment advice."
+    "Disclaimer: This tool is for educational and informational purposes only and does not "
+    "constitute financial, investment, legal, tax, or real estate advice. "
+    "All results are estimates. Users should conduct their own due diligence."
 )
+
+
