@@ -25,11 +25,11 @@ st.markdown(
     """
 )
 
-# ================= LAYOUT =================
-col1, col2, col3 = st.columns([1.2, 1, 1])
+# ================= MAIN LAYOUT =================
+left_col, mid_col, right_col = st.columns([1.2, 1, 1])
 
-# ================= LEFT COLUMN — DEAL INPUTS =================
-with col1:
+# ================= LEFT — DEAL INPUTS =================
+with left_col:
     st.header("🔢 Deal Inputs")
 
     purchase_price = st.number_input("Purchase Price ($)", min_value=0.0, step=1000.0)
@@ -61,7 +61,6 @@ with col1:
 # ================= CALCULATIONS =================
 if analyze:
     annual_rent = monthly_rent * 12
-
     vacancy_loss = annual_rent * vacancy_rate
     management_cost = annual_rent * management_fee
 
@@ -111,14 +110,8 @@ if analyze:
         "❌ Weak Deal"
     )
 
-    down_payment = purchase_price * down_payment_pct
-    closing_costs = purchase_price * closing_cost_pct
-    total_cash_needed = down_payment + rehab_cost + closing_costs
-    cash_pct_arv = total_cash_needed / arv if arv else 0
-
     st.session_state.results = {
         "Annual Rent": annual_rent,
-        "Monthly Rent": monthly_rent,
         "NOI Annual": noi_annual,
         "Cash Flow Annual": cash_flow_annual,
         "Cap Rate": cap_rate,
@@ -127,12 +120,11 @@ if analyze:
         "Score": deal_score,
         "Rating": rating,
         "Vacancy Rate": vacancy_rate,
-        "Down Payment %": down_payment_pct,
-        "Total Cash Needed": total_cash_needed
+        "Down Payment %": down_payment_pct
     }
 
-# ================= MIDDLE COLUMN — DEAL RESULTS =================
-with col2:
+# ================= MIDDLE — DEAL RESULTS =================
+with mid_col:
     st.header("📈 Deal Results")
 
     if "results" in st.session_state:
@@ -147,61 +139,63 @@ with col2:
         st.metric("Deal Score", f"{r['Score']:.0f}/100")
         st.subheader(r["Rating"])
 
-        # ================= TRAFFIC LIGHT INDICATORS =================
-        st.markdown("### 🚦 Deal Health Indicators")
+# ================= RIGHT — DEAL HEALTH =================
+with right_col:
+    st.header("🚦 Deal Health Indicators")
 
-        # Cash Flow
-        if r["Cash Flow Annual"] > 0:
-            st.success("🟢 Cash Flow: Positive (Property pays you)")
-        elif r["Cash Flow Annual"] > -1000:
-            st.warning("🟡 Cash Flow: Slightly Negative (Manage carefully)")
-        else:
-            st.error("🔴 Cash Flow: Negative (High risk)")
+    if "results" in st.session_state:
+        r = st.session_state.results
 
-        # Cap Rate
-        if r["Cap Rate"] >= 0.08:
-            st.success("🟢 Cap Rate: Strong")
-        elif r["Cap Rate"] >= 0.06:
-            st.warning("🟡 Cap Rate: Average")
-        else:
-            st.error("🔴 Cap Rate: Weak")
+        st.write(f"**Cash Flow:** ${r['Cash Flow Annual']:,.0f}")
+        st.success("🟢 Positive") if r["Cash Flow Annual"] > 0 else st.error("🔴 Negative")
 
-        # Cash-on-Cash
-        if r["CoC"] >= 0.12:
-            st.success("🟢 Cash-on-Cash: Excellent")
-        elif r["CoC"] >= 0.08:
-            st.warning("🟡 Cash-on-Cash: Acceptable")
-        else:
-            st.error("🔴 Cash-on-Cash: Poor")
+        st.write(f"**Cap Rate:** {r['Cap Rate']:.2%}")
+        st.success("🟢 Strong") if r["Cap Rate"] >= 0.08 else st.warning("🟡 Average") if r["Cap Rate"] >= 0.06 else st.error("🔴 Weak")
 
-        # Vacancy Risk
-        if r["Vacancy Rate"] <= 0.05:
-            st.success("🟢 Vacancy Risk: Low")
-        elif r["Vacancy Rate"] <= 0.10:
-            st.warning("🟡 Vacancy Risk: Moderate")
-        else:
-            st.error("🔴 Vacancy Risk: High")
+        st.write(f"**Cash-on-Cash:** {r['CoC']:.2%}")
+        st.success("🟢 Excellent") if r["CoC"] >= 0.12 else st.warning("🟡 Acceptable") if r["CoC"] >= 0.08 else st.error("🔴 Poor")
 
-        # Leverage Risk
-        if r["Down Payment %"] >= 0.25:
-            st.success("🟢 Leverage: Conservative")
-        elif r["Down Payment %"] >= 0.15:
-            st.warning("🟡 Leverage: Moderate")
-        else:
-            st.error("🔴 Leverage: Aggressive")
+        st.write(f"**Vacancy Rate:** {r['Vacancy Rate']:.1%}")
+        st.success("🟢 Low Risk") if r["Vacancy Rate"] <= 0.05 else st.warning("🟡 Moderate") if r["Vacancy Rate"] <= 0.10 else st.error("🔴 High Risk")
 
-        # Overall Verdict
-        if r["Score"] >= 75:
-            st.success("🟢 Overall Deal Risk: LOW")
-        elif r["Score"] >= 55:
-            st.warning("🟡 Overall Deal Risk: MODERATE")
-        else:
-            st.error("🔴 Overall Deal Risk: HIGH")
+# ================= DOWNLOAD BUTTONS =================
+if "results" in st.session_state:
+    df = pd.DataFrame.from_dict(st.session_state.results, orient="index", columns=["Value"])
+
+    excel_buffer = BytesIO()
+    df.to_excel(excel_buffer)
+    excel_buffer.seek(0)
+
+    excel_btn.download_button(
+        "⬇️ Excel",
+        excel_buffer,
+        "rental_deal_analysis.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+    pdf_buffer = BytesIO()
+    c = canvas.Canvas(pdf_buffer, pagesize=letter)
+    y = 750
+
+    for k, v in st.session_state.results.items():
+        c.drawString(40, y, f"{k}: {v}")
+        y -= 18
+        if y < 50:
+            c.showPage()
+            y = 750
+
+    c.save()
+    pdf_buffer.seek(0)
+
+    pdf_btn.download_button(
+        "⬇️ PDF",
+        pdf_buffer,
+        "rental_deal_analysis.pdf",
+        mime="application/pdf"
+    )
 
 # ================= DISCLAIMER =================
 st.markdown("---")
 st.caption(
-    "Disclaimer: This tool is for educational and informational purposes only and does not "
-    "constitute financial, investment, legal, tax, or real estate advice. "
-    "All results are estimates. Users should conduct their own due diligence."
+    "Educational use only. Not financial, legal, or investment advice. Estimates only."
 )
