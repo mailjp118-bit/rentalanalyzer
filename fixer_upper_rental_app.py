@@ -145,7 +145,7 @@ if analyze:
 # ================= MIDDLE COLUMN — DEAL RESULTS =================
 with col2:
     st.markdown(
-        "## 📈 Deal Results <span title='Summary of rental income, cash flow, returns, and leverage metrics for the property.'>ℹ️</span>",
+        "## <span title='Summary of rental income, cash flow, returns, and leverage metrics for the property.'>❓</span> 📈 Deal Results",
         unsafe_allow_html=True
     )
 
@@ -172,7 +172,7 @@ with col2:
 # ================= RIGHT COLUMN — EXPENSES + CASH =================
 with col3:
     st.markdown(
-        "## 💸 Expense Breakdown <span title='Operating costs required to run the rental property, excluding mortgage payments.'>ℹ️</span>",
+        "## <span title='Operating costs required to run the rental property, excluding mortgage payments.'>❓</span> 💸 Expense Breakdown",
         unsafe_allow_html=True
     )
 
@@ -189,7 +189,7 @@ with col3:
             st.write(f"**Total Expenses:** ${r['Total Expenses Annual']/12:,.0f}")
 
         st.markdown(
-            "### 💰 Cash Required at Closing <span title='Total upfront cash needed to acquire the property, including down payment, rehab, and closing costs.'>ℹ️</span>",
+            "### <span title='Total upfront cash needed to acquire the property, including down payment, rehab, and closing costs.'>❓</span> 💰 Cash Required at Closing",
             unsafe_allow_html=True
         )
 
