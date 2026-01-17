@@ -1,8 +1,4 @@
 import streamlit as st
-from openpyxl import Workbook
-from reportlab.platypus import SimpleDocTemplate, Paragraph
-from reportlab.lib.styles import getSampleStyleSheet
-from io import BytesIO
 
 # ================= PAGE CONFIG =================
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
@@ -15,16 +11,7 @@ st.markdown(
     """
 )
 
-# ================= TOP HEADER WITH DOWNLOAD BUTTONS (ADDED) =================
-title_col, download_col = st.columns([3, 1])
-
-with title_col:
-    st.title("🏚️ Fixer-Upper Rental Deal Analyzer")
-
-with download_col:
-    if "results" in st.session_state:
-        excel_download = st.button("⬇️ Excel")
-        pdf_download = st.button("⬇️ PDF")
+st.title("🏚️ Fixer-Upper Rental Deal Analyzer")
 
 # ================= LAYOUT =================
 left_col, right_col = st.columns([1, 1])
@@ -33,53 +20,33 @@ left_col, right_col = st.columns([1, 1])
 with left_col:
     st.header("🔢 Deal Inputs")
 
-    purchase_price = st.number_input(
-        "Purchase Price ($)", value=None, placeholder="Enter amount", step=1000.0
-    )
-    rehab_cost = st.number_input(
-        "Rehab Cost ($)", value=None, placeholder="Enter amount", step=1000.0
-    )
-    arv = st.number_input(
-        "After Repair Value (ARV) ($)", value=None, placeholder="Enter amount", step=1000.0
-    )
+    purchase_price = st.number_input("Purchase Price ($)", min_value=0.0, step=1000.0)
+    rehab_cost = st.number_input("Rehab Cost ($)", min_value=0.0, step=1000.0)
+    arv = st.number_input("After Repair Value (ARV) ($)", min_value=0.0, step=1000.0)
 
-    monthly_rent = st.number_input(
-        "Monthly Rent ($)", value=None, placeholder="Enter amount", step=100.0
-    )
+    monthly_rent = st.number_input("Monthly Rent ($)", min_value=0.0, step=100.0)
 
-    property_tax = st.number_input(
-        "Annual Property Tax ($)", value=None, placeholder="Enter amount"
-    )
-    insurance = st.number_input(
-        "Annual Insurance ($)", value=None, placeholder="Enter amount"
-    )
-    maintenance = st.number_input(
-        "Annual Maintenance ($)", value=None, placeholder="Enter amount"
-    )
+    property_tax = st.number_input("Annual Property Tax ($)", min_value=0.0)
+    insurance = st.number_input("Annual Insurance ($)", min_value=0.0)
+    maintenance = st.number_input("Annual Maintenance ($)", min_value=0.0)
 
-    vacancy_rate = st.number_input(
-        "Vacancy Rate (%)", value=None, placeholder="e.g. 5"
-    ) / 100
-    management_fee = st.number_input(
-        "Management Fee (%)", value=None, placeholder="e.g. 8"
-    ) / 100
+    vacancy_rate = st.number_input("Vacancy Rate (%)", 0.0, 100.0) / 100
+    management_fee = st.number_input("Management Fee (%)", 0.0, 100.0) / 100
 
-    down_payment_pct = st.number_input(
-        "Down Payment (%)", value=None, placeholder="e.g. 20"
-    ) / 100
-    interest_rate = st.number_input(
-        "Interest Rate (%)", value=None, placeholder="e.g. 6.5"
-    ) / 100
-    loan_term = st.number_input("Loan Term (Years)", value=30)
+    down_payment_pct = st.number_input("Down Payment (%)", 0.0, 100.0) / 100
+    interest_rate = st.number_input("Interest Rate (%)", 0.0, 15.0) / 100
+    loan_term = st.number_input("Loan Term (Years)", 1, 40)
 
     closing_cost_pct = st.number_input(
         "Estimated Closing Costs (% of Purchase Price)",
+        min_value=0.0,
+        max_value=10.0,
         value=3.0
     ) / 100
 
     analyze = st.button("📊 Analyze Deal")
 
-# ================= CALCULATIONS (UNCHANGED) =================
+# ================= CALCULATIONS =================
 if analyze:
     annual_rent = monthly_rent * 12
 
@@ -102,9 +69,12 @@ if analyze:
     monthly_rate = interest_rate / 12
     total_payments = loan_term * 12
 
-    monthly_payment = loan_amount * (
-        monthly_rate * (1 + monthly_rate) ** total_payments
-    ) / ((1 + monthly_rate) ** total_payments - 1)
+    if interest_rate > 0:
+        monthly_payment = loan_amount * (
+            monthly_rate * (1 + monthly_rate) ** total_payments
+        ) / ((1 + monthly_rate) ** total_payments - 1)
+    else:
+        monthly_payment = loan_amount / total_payments
 
     annual_debt = monthly_payment * 12
     cash_flow_annual = noi_annual - annual_debt
@@ -112,9 +82,9 @@ if analyze:
     total_investment = purchase_price + rehab_cost
     cash_invested = purchase_price * down_payment_pct + rehab_cost
 
-    cap_rate = noi_annual / total_investment
-    coc_return = cash_flow_annual / cash_invested
-    equity_pct = (arv - total_investment) / arv
+    cap_rate = noi_annual / total_investment if total_investment else 0
+    coc_return = cash_flow_annual / cash_invested if cash_invested else 0
+    equity_pct = (arv - total_investment) / arv if arv else 0
 
     deal_score = min(
         100,
@@ -130,14 +100,30 @@ if analyze:
         "❌ Weak Deal"
     )
 
+    # ================= OPTION 4: CASH REQUIRED AT CLOSING =================
+    down_payment = purchase_price * down_payment_pct
+    closing_costs = purchase_price * closing_cost_pct
+    total_cash_needed = down_payment + rehab_cost + closing_costs
+    cash_pct_arv = total_cash_needed / arv if arv else 0
+
     st.session_state.results = {
-        "NOI": noi_annual,
-        "Cash Flow": cash_flow_annual,
+        "Annual Rent": annual_rent,
+        "Monthly Rent": monthly_rent,
+        "NOI Annual": noi_annual,
+        "Cash Flow Annual": cash_flow_annual,
+        "Debt Annual": annual_debt,
+        "Debt Monthly": monthly_payment,
         "Cap Rate": cap_rate,
         "CoC": coc_return,
         "Equity": equity_pct,
         "Score": deal_score,
-        "Rating": rating
+        "Rating": rating,
+        "Expenses Annual": expenses_annual,
+        "Total Expenses Annual": total_expenses_annual,
+        "Down Payment": down_payment,
+        "Closing Costs": closing_costs,
+        "Total Cash Needed": total_cash_needed,
+        "Cash % ARV": cash_pct_arv
     }
 
 # ================= RIGHT COLUMN =================
@@ -147,55 +133,53 @@ with right_col:
     if "results" in st.session_state:
         r = st.session_state.results
 
-        st.metric("NOI", f"${r['NOI']:,.0f}")
-        st.metric("Annual Cash Flow", f"${r['Cash Flow']:,.0f}")
+        view = st.radio("View Mode", ["Annual", "Monthly"], horizontal=True)
+
+        if view == "Annual":
+            rent = r["Annual Rent"]
+            noi = r["NOI Annual"]
+            cash_flow = r["Cash Flow Annual"]
+            debt = r["Debt Annual"]
+            expenses = r["Expenses Annual"]
+            total_exp = r["Total Expenses Annual"]
+        else:
+            rent = r["Monthly Rent"]
+            noi = r["NOI Annual"] / 12
+            cash_flow = r["Cash Flow Annual"] / 12
+            debt = r["Debt Monthly"]
+            expenses = {k: v / 12 for k, v in r["Expenses Annual"].items()}
+            total_exp = r["Total Expenses Annual"] / 12
+
+        st.metric("Gross Rent", f"${rent:,.0f}")
+        st.metric("NOI", f"${noi:,.0f}")
+        st.metric("Cash Flow", f"${cash_flow:,.0f}")
+        st.metric("Debt Service", f"${debt:,.0f}")
         st.metric("Cap Rate", f"{r['Cap Rate']:.2%}")
         st.metric("Cash-on-Cash Return", f"{r['CoC']:.2%}")
         st.metric("Equity Percentage", f"{r['Equity']:.2%}")
         st.metric("Rental Deal Score", f"{r['Score']:.0f}/100")
         st.subheader(r["Rating"])
 
-# ================= DOWNLOAD LOGIC (ADDED) =================
-if "results" in st.session_state:
+        st.markdown("### 💸 Expense Breakdown")
+        for name, value in expenses.items():
+            pct = (value / rent * 100) if rent else 0
+            st.write(f"**{name}**: ${value:,.0f} ({pct:.1f}%)")
 
-    if excel_download:
-        wb = Workbook()
-        ws = wb.active
-        ws.title = "Deal Summary"
-        for k, v in st.session_state.results.items():
-            ws.append([k, v])
+        st.write(f"**Total Operating Expenses:** ${total_exp:,.0f}")
 
-        excel_data = BytesIO()
-        wb.save(excel_data)
+        st.markdown("### 💰 Cash Required at Closing")
+        st.write(f"Down Payment: ${r['Down Payment']:,.0f}")
+        st.write(f"Rehab Budget: ${rehab_cost:,.0f}")
+        st.write(f"Closing Costs: ${r['Closing Costs']:,.0f}")
+        st.write(f"**Total Cash Needed:** ${r['Total Cash Needed']:,.0f}")
+        st.write(f"Cash Needed as % of ARV: {r['Cash % ARV']:.1%}")
 
-        st.download_button(
-            "Download Excel File",
-            excel_data.getvalue(),
-            file_name="rental_deal.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-
-    if pdf_download:
-        pdf_data = BytesIO()
-        doc = SimpleDocTemplate(pdf_data)
-        styles = getSampleStyleSheet()
-        content = [
-            Paragraph(f"<b>{k}:</b> {v}", styles["Normal"])
-            for k, v in st.session_state.results.items()
-        ]
-        doc.build(content)
-
-        st.download_button(
-            "Download PDF File",
-            pdf_data.getvalue(),
-            file_name="rental_deal.pdf",
-            mime="application/pdf"
-        )
+    else:
+        st.info("Enter inputs and click **Analyze Deal**")
 
 # ================= DISCLAIMER =================
 st.markdown("---")
 st.caption(
-    "Disclaimer: This tool is for educational and informational purposes only and does not "
-    "constitute financial, investment, legal, tax, or real estate advice. "
-    "All results are estimates. Users should conduct their own due diligence."
+    "Disclaimer: This tool is provided for educational and informational purposes only and does not constitute "
+    "financial, investment, legal, or tax advice. Estimates only. Consult licensed professionals in the United States or Canada."
 )
