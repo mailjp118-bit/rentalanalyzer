@@ -1,7 +1,21 @@
 import streamlit as st
+import pandas as pd
+from io import BytesIO
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
 # ================= PAGE CONFIG =================
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
+
+# ================= TOP BAR =================
+top_left, top_right = st.columns([6, 2])
+
+with top_left:
+    st.title("🏚️ Fixer-Upper Rental Deal Analyzer")
+
+with top_right:
+    excel_btn = st.empty()
+    pdf_btn = st.empty()
 
 # ================= PRIVACY MESSAGE =================
 st.markdown(
@@ -11,13 +25,11 @@ st.markdown(
     """
 )
 
-st.title("🏚️ Fixer-Upper Rental Deal Analyzer")
-
 # ================= LAYOUT =================
-left_col, right_col = st.columns([1, 1])
+col1, col2, col3 = st.columns([1.2, 1, 1])
 
-# ================= LEFT COLUMN =================
-with left_col:
+# ================= LEFT COLUMN — DEAL INPUTS =================
+with col1:
     st.header("🔢 Deal Inputs")
 
     purchase_price = st.number_input("Purchase Price ($)", min_value=0.0, step=1000.0)
@@ -65,7 +77,6 @@ if analyze:
     noi_annual = annual_rent - total_expenses_annual
 
     loan_amount = purchase_price * (1 - down_payment_pct)
-
     monthly_rate = interest_rate / 12
     total_payments = loan_term * 12
 
@@ -100,7 +111,6 @@ if analyze:
         "❌ Weak Deal"
     )
 
-    # ================= OPTION 4: CASH REQUIRED AT CLOSING =================
     down_payment = purchase_price * down_payment_pct
     closing_costs = purchase_price * closing_cost_pct
     total_cash_needed = down_payment + rehab_cost + closing_costs
@@ -126,46 +136,33 @@ if analyze:
         "Cash % ARV": cash_pct_arv
     }
 
-# ================= RIGHT COLUMN =================
-with right_col:
+# ================= MIDDLE COLUMN — DEAL RESULTS =================
+with col2:
     st.header("📈 Deal Results")
 
     if "results" in st.session_state:
         r = st.session_state.results
 
-        view = st.radio("View Mode", ["Annual", "Monthly"], horizontal=True)
-
-        if view == "Annual":
-            rent = r["Annual Rent"]
-            noi = r["NOI Annual"]
-            cash_flow = r["Cash Flow Annual"]
-            debt = r["Debt Annual"]
-            expenses = r["Expenses Annual"]
-            total_exp = r["Total Expenses Annual"]
-        else:
-            rent = r["Monthly Rent"]
-            noi = r["NOI Annual"] / 12
-            cash_flow = r["Cash Flow Annual"] / 12
-            debt = r["Debt Monthly"]
-            expenses = {k: v / 12 for k, v in r["Expenses Annual"].items()}
-            total_exp = r["Total Expenses Annual"] / 12
-
-        st.metric("Gross Rent", f"${rent:,.0f}")
-        st.metric("NOI", f"${noi:,.0f}")
-        st.metric("Cash Flow", f"${cash_flow:,.0f}")
-        st.metric("Debt Service", f"${debt:,.0f}")
+        st.metric("Annual Rent", f"${r['Annual Rent']:,.0f}")
+        st.metric("NOI", f"${r['NOI Annual']:,.0f}")
+        st.metric("Cash Flow", f"${r['Cash Flow Annual']:,.0f}")
         st.metric("Cap Rate", f"{r['Cap Rate']:.2%}")
         st.metric("Cash-on-Cash Return", f"{r['CoC']:.2%}")
-        st.metric("Equity Percentage", f"{r['Equity']:.2%}")
+        st.metric("Equity %", f"{r['Equity']:.2%}")
         st.metric("Rental Deal Score", f"{r['Score']:.0f}/100")
         st.subheader(r["Rating"])
 
-        st.markdown("### 💸 Expense Breakdown")
-        for name, value in expenses.items():
-            pct = (value / rent * 100) if rent else 0
-            st.write(f"**{name}**: ${value:,.0f} ({pct:.1f}%)")
+# ================= RIGHT COLUMN — EXPENSES + CASH =================
+with col3:
+    st.header("💸 Expense Breakdown")
 
-        st.write(f"**Total Operating Expenses:** ${total_exp:,.0f}")
+    if "results" in st.session_state:
+        r = st.session_state.results
+
+        for name, value in r["Expenses Annual"].items():
+            st.write(f"**{name}**: ${value:,.0f}")
+
+        st.write(f"**Total Expenses:** ${r['Total Expenses Annual']:,.0f}")
 
         st.markdown("### 💰 Cash Required at Closing")
         st.write(f"Down Payment: ${r['Down Payment']:,.0f}")
@@ -174,12 +171,44 @@ with right_col:
         st.write(f"**Total Cash Needed:** ${r['Total Cash Needed']:,.0f}")
         st.write(f"Cash Needed as % of ARV: {r['Cash % ARV']:.1%}")
 
-    else:
-        st.info("Enter inputs and click **Analyze Deal**")
+# ================= DOWNLOAD BUTTONS =================
+if "results" in st.session_state:
+    df = pd.DataFrame.from_dict(st.session_state.results, orient="index", columns=["Value"])
+
+    excel_buffer = BytesIO()
+    df.to_excel(excel_buffer)
+    excel_buffer.seek(0)
+
+    excel_btn.download_button(
+        "⬇️ Download Excel",
+        excel_buffer,
+        "rental_deal_analysis.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+    pdf_buffer = BytesIO()
+    c = canvas.Canvas(pdf_buffer, pagesize=letter)
+    y = 750
+
+    for k, v in st.session_state.results.items():
+        c.drawString(40, y, f"{k}: {v}")
+        y -= 18
+        if y < 50:
+            c.showPage()
+            y = 750
+
+    c.save()
+    pdf_buffer.seek(0)
+
+    pdf_btn.download_button(
+        "⬇️ Download PDF",
+        pdf_buffer,
+        "rental_deal_analysis.pdf",
+        mime="application/pdf"
+    )
 
 # ================= DISCLAIMER =================
 st.markdown("---")
 st.caption(
-    "Disclaimer: This tool is provided for educational and informational purposes only and does not constitute "
-    "financial, investment, legal, or tax advice. Estimates only. Consult licensed professionals in the United States or Canada."
+    "Disclaimer: This tool is for educational purposes only and does not constitute financial or investment advice."
 )
