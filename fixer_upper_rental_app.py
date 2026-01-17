@@ -121,19 +121,14 @@ if analyze:
         "Monthly Rent": monthly_rent,
         "NOI Annual": noi_annual,
         "Cash Flow Annual": cash_flow_annual,
-        "Debt Annual": annual_debt,
-        "Debt Monthly": monthly_payment,
         "Cap Rate": cap_rate,
         "CoC": coc_return,
         "Equity": equity_pct,
         "Score": deal_score,
         "Rating": rating,
-        "Expenses Annual": expenses_annual,
-        "Total Expenses Annual": total_expenses_annual,
-        "Down Payment": down_payment,
-        "Closing Costs": closing_costs,
-        "Total Cash Needed": total_cash_needed,
-        "Cash % ARV": cash_pct_arv
+        "Vacancy Rate": vacancy_rate,
+        "Down Payment %": down_payment_pct,
+        "Total Cash Needed": total_cash_needed
     }
 
 # ================= MIDDLE COLUMN — DEAL RESULTS =================
@@ -149,63 +144,59 @@ with col2:
         st.metric("Cap Rate", f"{r['Cap Rate']:.2%}")
         st.metric("Cash-on-Cash Return", f"{r['CoC']:.2%}")
         st.metric("Equity %", f"{r['Equity']:.2%}")
-        st.metric("Rental Deal Score", f"{r['Score']:.0f}/100")
+        st.metric("Deal Score", f"{r['Score']:.0f}/100")
         st.subheader(r["Rating"])
 
-# ================= RIGHT COLUMN — EXPENSES + CASH =================
-with col3:
-    st.header("💸 Expense Breakdown")
+        # ================= TRAFFIC LIGHT INDICATORS =================
+        st.markdown("### 🚦 Deal Health Indicators")
 
-    if "results" in st.session_state:
-        r = st.session_state.results
+        # Cash Flow
+        if r["Cash Flow Annual"] > 0:
+            st.success("🟢 Cash Flow: Positive (Property pays you)")
+        elif r["Cash Flow Annual"] > -1000:
+            st.warning("🟡 Cash Flow: Slightly Negative (Manage carefully)")
+        else:
+            st.error("🔴 Cash Flow: Negative (High risk)")
 
-        for name, value in r["Expenses Annual"].items():
-            st.write(f"**{name}**: ${value:,.0f}")
+        # Cap Rate
+        if r["Cap Rate"] >= 0.08:
+            st.success("🟢 Cap Rate: Strong")
+        elif r["Cap Rate"] >= 0.06:
+            st.warning("🟡 Cap Rate: Average")
+        else:
+            st.error("🔴 Cap Rate: Weak")
 
-        st.write(f"**Total Expenses:** ${r['Total Expenses Annual']:,.0f}")
+        # Cash-on-Cash
+        if r["CoC"] >= 0.12:
+            st.success("🟢 Cash-on-Cash: Excellent")
+        elif r["CoC"] >= 0.08:
+            st.warning("🟡 Cash-on-Cash: Acceptable")
+        else:
+            st.error("🔴 Cash-on-Cash: Poor")
 
-        st.markdown("### 💰 Cash Required at Closing")
-        st.write(f"Down Payment: ${r['Down Payment']:,.0f}")
-        st.write(f"Rehab Budget: ${rehab_cost:,.0f}")
-        st.write(f"Closing Costs: ${r['Closing Costs']:,.0f}")
-        st.write(f"**Total Cash Needed:** ${r['Total Cash Needed']:,.0f}")
-        st.write(f"Cash Needed as % of ARV: {r['Cash % ARV']:.1%}")
+        # Vacancy Risk
+        if r["Vacancy Rate"] <= 0.05:
+            st.success("🟢 Vacancy Risk: Low")
+        elif r["Vacancy Rate"] <= 0.10:
+            st.warning("🟡 Vacancy Risk: Moderate")
+        else:
+            st.error("🔴 Vacancy Risk: High")
 
-# ================= DOWNLOAD BUTTONS =================
-if "results" in st.session_state:
-    df = pd.DataFrame.from_dict(st.session_state.results, orient="index", columns=["Value"])
+        # Leverage Risk
+        if r["Down Payment %"] >= 0.25:
+            st.success("🟢 Leverage: Conservative")
+        elif r["Down Payment %"] >= 0.15:
+            st.warning("🟡 Leverage: Moderate")
+        else:
+            st.error("🔴 Leverage: Aggressive")
 
-    excel_buffer = BytesIO()
-    df.to_excel(excel_buffer)
-    excel_buffer.seek(0)
-
-    excel_btn.download_button(
-        "⬇️ Download Excel",
-        excel_buffer,
-        "rental_deal_analysis.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-
-    pdf_buffer = BytesIO()
-    c = canvas.Canvas(pdf_buffer, pagesize=letter)
-    y = 750
-
-    for k, v in st.session_state.results.items():
-        c.drawString(40, y, f"{k}: {v}")
-        y -= 18
-        if y < 50:
-            c.showPage()
-            y = 750
-
-    c.save()
-    pdf_buffer.seek(0)
-
-    pdf_btn.download_button(
-        "⬇️ Download PDF",
-        pdf_buffer,
-        "rental_deal_analysis.pdf",
-        mime="application/pdf"
-    )
+        # Overall Verdict
+        if r["Score"] >= 75:
+            st.success("🟢 Overall Deal Risk: LOW")
+        elif r["Score"] >= 55:
+            st.warning("🟡 Overall Deal Risk: MODERATE")
+        else:
+            st.error("🔴 Overall Deal Risk: HIGH")
 
 # ================= DISCLAIMER =================
 st.markdown("---")
@@ -214,5 +205,3 @@ st.caption(
     "constitute financial, investment, legal, tax, or real estate advice. "
     "All results are estimates. Users should conduct their own due diligence."
 )
-
-
