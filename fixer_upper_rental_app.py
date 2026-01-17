@@ -25,8 +25,8 @@ st.markdown(
     """
 )
 
-# ================= LAYOUT =================
-col1, col2, col3 = st.columns([1.2, 1, 1])
+# ================= MAIN LAYOUT (WITH SPACING) =================
+col1, spacer1, col2, spacer2, col3 = st.columns([1.2, 0.15, 1, 0.15, 1])
 
 # ================= LEFT COLUMN — DEAL INPUTS =================
 with col1:
@@ -61,7 +61,6 @@ with col1:
 # ================= CALCULATIONS =================
 if analyze:
     annual_rent = monthly_rent * 12
-
     vacancy_loss = annual_rent * vacancy_rate
     management_cost = annual_rent * management_fee
 
@@ -151,44 +150,6 @@ with col2:
         st.metric("Equity %", f"{r['Equity']:.2%}")
         st.metric("Rental Deal Score", f"{r['Score']:.0f}/100")
         st.subheader(r["Rating"])
-
-        # ================= RISK FLAGS (OPTION 2) =================
-        st.markdown("### 🚦 Risk Indicators")
-
-        if r["Cash Flow Annual"] > 0:
-            st.success("🟢 Positive Cash Flow – Property pays you every year.")
-        elif r["Cash Flow Annual"] > -1000:
-            st.warning("🟡 Slightly Negative Cash Flow – Watch expenses closely.")
-        else:
-            st.error("🔴 Negative Cash Flow – High risk unless appreciation is strong.")
-
-        if vacancy_rate <= 0.05:
-            st.success("🟢 Low Vacancy Assumption – Conservative.")
-        elif vacancy_rate <= 0.10:
-            st.warning("🟡 Moderate Vacancy – Acceptable in some markets.")
-        else:
-            st.error("🔴 High Vacancy – Tenant demand risk.")
-
-        if down_payment_pct >= 0.25:
-            st.success("🟢 Strong Equity Position – Lower leverage risk.")
-        elif down_payment_pct >= 0.15:
-            st.warning("🟡 Moderate Leverage – Monitor cash flow.")
-        else:
-            st.error("🔴 Highly Leveraged – Higher risk during downturns.")
-
-        if r["Cap Rate"] >= 0.08:
-            st.success("🟢 Strong Cap Rate – Healthy income relative to price.")
-        elif r["Cap Rate"] >= 0.06:
-            st.warning("🟡 Average Cap Rate – Common in stable markets.")
-        else:
-            st.error("🔴 Low Cap Rate – Relies on appreciation.")
-
-        if r["Score"] >= 75:
-            st.success("🟢 Overall Risk: LOW – Deal fundamentals are strong.")
-        elif r["Score"] >= 55:
-            st.warning("🟡 Overall Risk: MODERATE – Review carefully.")
-        else:
-            st.error("🔴 Overall Risk: HIGH – Proceed with caution.")
 
 # ================= RIGHT COLUMN — EXPENSES + CASH =================
 with col3:
