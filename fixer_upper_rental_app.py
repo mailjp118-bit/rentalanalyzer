@@ -11,7 +11,7 @@ st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
 top_left, top_middle, top_right = st.columns([5, 2, 2])
 
 with top_left:
-    st.title("🏚️ Fixer-Upper Rental Deal Analyzer")
+    st.title("🏚️ Rental Deal Analyzer")
 
 with top_middle:
     breakdown_view = st.selectbox(
@@ -232,3 +232,4 @@ st.caption(
     "constitute financial, investment, legal, tax, or real estate advice. "
     "All results are estimates. Users should conduct their own due diligence."
 )
+
