@@ -230,6 +230,8 @@ st.markdown("---")
 st.caption(
     "Disclaimer: This tool is for educational and informational purposes only and does not "
     "constitute financial, investment, legal, tax, or real estate advice. "
-    "All results are estimates. Users should conduct their own due diligence."
+    "All outputs are estimates, and use of this tool is at your own risk."
 )
+
+
 
