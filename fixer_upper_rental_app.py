@@ -8,10 +8,17 @@ from reportlab.pdfgen import canvas
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
 
 # ================= TOP BAR =================
-top_left, top_right = st.columns([6, 2])
+top_left, top_middle, top_right = st.columns([5, 2, 2])
 
 with top_left:
     st.title("🏚️ Fixer-Upper Rental Deal Analyzer")
+
+with top_middle:
+    breakdown_view = st.selectbox(
+        "📊 Deal Results View",
+        ["Annual", "Monthly"],
+        index=0
+    )
 
 with top_right:
     excel_btn = st.empty()
@@ -25,7 +32,7 @@ st.markdown(
     """
 )
 
-# ================= MAIN LAYOUT (WITH SPACING) =================
+# ================= MAIN LAYOUT =================
 col1, spacer1, col2, spacer2, col3 = st.columns([1.2, 0.15, 1, 0.15, 1])
 
 # ================= LEFT COLUMN — DEAL INPUTS =================
@@ -142,9 +149,17 @@ with col2:
     if "results" in st.session_state:
         r = st.session_state.results
 
-        st.metric("Annual Rent", f"${r['Annual Rent']:,.0f}")
-        st.metric("NOI", f"${r['NOI Annual']:,.0f}")
-        st.metric("Cash Flow", f"${r['Cash Flow Annual']:,.0f}")
+        if breakdown_view == "Annual":
+            st.metric("Rent", f"${r['Annual Rent']:,.0f}")
+            st.metric("NOI", f"${r['NOI Annual']:,.0f}")
+            st.metric("Cash Flow", f"${r['Cash Flow Annual']:,.0f}")
+            st.metric("Debt Service", f"${r['Debt Annual']:,.0f}")
+        else:
+            st.metric("Rent", f"${r['Monthly Rent']:,.0f}")
+            st.metric("NOI", f"${r['NOI Annual']/12:,.0f}")
+            st.metric("Cash Flow", f"${r['Cash Flow Annual']/12:,.0f}")
+            st.metric("Debt Service", f"${r['Debt Monthly']:,.0f}")
+
         st.metric("Cap Rate", f"{r['Cap Rate']:.2%}")
         st.metric("Cash-on-Cash Return", f"{r['CoC']:.2%}")
         st.metric("Equity %", f"{r['Equity']:.2%}")
