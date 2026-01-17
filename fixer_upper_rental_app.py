@@ -1,13 +1,14 @@
 import streamlit as st
-import pandas as pd
 
 # ================= PAGE CONFIG =================
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
 
 # ================= PRIVACY MESSAGE =================
 st.markdown(
-    "🔒 **Privacy Notice:** *We do not store or track your deal data. "
-    "All calculations run locally and reset when you refresh the page.*"
+    """
+    🔒 **Privacy Notice:**  
+    *We do not store or track your deal data. All calculations are performed in real-time and reset when you refresh the page.*
+    """
 )
 
 st.title("🏚️ Fixer-Upper Rental Deal Analyzer")
@@ -64,6 +65,7 @@ if analyze:
     noi_annual = annual_rent - total_expenses_annual
 
     loan_amount = purchase_price * (1 - down_payment_pct)
+
     monthly_rate = interest_rate / 12
     total_payments = loan_term * 12
 
@@ -98,7 +100,7 @@ if analyze:
         "❌ Weak Deal"
     )
 
-    # Cash Required at Closing
+    # ================= OPTION 4: CASH REQUIRED AT CLOSING =================
     down_payment = purchase_price * down_payment_pct
     closing_costs = purchase_price * closing_cost_pct
     total_cash_needed = down_payment + rehab_cost + closing_costs
@@ -107,19 +109,20 @@ if analyze:
     st.session_state.results = {
         "Annual Rent": annual_rent,
         "Monthly Rent": monthly_rent,
-        "NOI": noi_annual,
-        "Cash Flow": cash_flow_annual,
-        "Debt": annual_debt,
+        "NOI Annual": noi_annual,
+        "Cash Flow Annual": cash_flow_annual,
+        "Debt Annual": annual_debt,
+        "Debt Monthly": monthly_payment,
         "Cap Rate": cap_rate,
         "CoC": coc_return,
         "Equity": equity_pct,
         "Score": deal_score,
         "Rating": rating,
-        "Expenses": expenses_annual,
-        "Total Expenses": total_expenses_annual,
-        "Cash Needed": total_cash_needed,
+        "Expenses Annual": expenses_annual,
+        "Total Expenses Annual": total_expenses_annual,
         "Down Payment": down_payment,
         "Closing Costs": closing_costs,
+        "Total Cash Needed": total_cash_needed,
         "Cash % ARV": cash_pct_arv
     }
 
@@ -132,58 +135,43 @@ with right_col:
 
         view = st.radio("View Mode", ["Annual", "Monthly"], horizontal=True)
 
-        factor = 1 if view == "Annual" else 1 / 12
+        if view == "Annual":
+            rent = r["Annual Rent"]
+            noi = r["NOI Annual"]
+            cash_flow = r["Cash Flow Annual"]
+            debt = r["Debt Annual"]
+            expenses = r["Expenses Annual"]
+            total_exp = r["Total Expenses Annual"]
+        else:
+            rent = r["Monthly Rent"]
+            noi = r["NOI Annual"] / 12
+            cash_flow = r["Cash Flow Annual"] / 12
+            debt = r["Debt Monthly"]
+            expenses = {k: v / 12 for k, v in r["Expenses Annual"].items()}
+            total_exp = r["Total Expenses Annual"] / 12
 
-        # ================= DEAL SUMMARY CARD =================
-        st.markdown("### 🧾 Deal Summary")
-        st.markdown(
-            f"""
-            **Deal Rating:** {r['Rating']}  
-            **Rental Deal Score:** {r['Score']:.0f}/100  
-            **Cap Rate:** {r['Cap Rate']:.2%}  
-            **Cash-on-Cash Return:** {r['CoC']:.2%}  
-            **Total Cash Needed:** ${r['Cash Needed']:,.0f}  
-            """
-        )
+        st.metric("Gross Rent", f"${rent:,.0f}")
+        st.metric("NOI", f"${noi:,.0f}")
+        st.metric("Cash Flow", f"${cash_flow:,.0f}")
+        st.metric("Debt Service", f"${debt:,.0f}")
+        st.metric("Cap Rate", f"{r['Cap Rate']:.2%}")
+        st.metric("Cash-on-Cash Return", f"{r['CoC']:.2%}")
+        st.metric("Equity Percentage", f"{r['Equity']:.2%}")
+        st.metric("Rental Deal Score", f"{r['Score']:.0f}/100")
+        st.subheader(r["Rating"])
 
-        # ================= METRICS =================
-        st.metric("Gross Rent", f"${r['Annual Rent'] * factor:,.0f}")
-        st.metric("NOI", f"${r['NOI'] * factor:,.0f}")
-        st.metric("Cash Flow", f"${r['Cash Flow'] * factor:,.0f}")
-        st.metric("Debt Service", f"${r['Debt'] * factor:,.0f}")
+        st.markdown("### 💸 Expense Breakdown")
+        for name, value in expenses.items():
+            pct = (value / rent * 100) if rent else 0
+            st.write(f"**{name}**: ${value:,.0f} ({pct:.1f}%)")
 
-        # ================= CASH FLOW CHART =================
-        st.markdown("### 📊 Cash Flow Overview")
+        st.write(f"**Total Operating Expenses:** ${total_exp:,.0f}")
 
-        cashflow_df = pd.DataFrame({
-            "Category": ["Rent", "Expenses", "Debt", "Cash Flow"],
-            "Amount": [
-                r["Annual Rent"] * factor,
-                r["Total Expenses"] * factor,
-                r["Debt"] * factor,
-                r["Cash Flow"] * factor
-            ]
-        })
-
-        st.bar_chart(cashflow_df.set_index("Category"))
-
-        # ================= EXPENSE PIE CHART =================
-        st.markdown("### 🧩 Expense Breakdown")
-
-        expense_df = pd.DataFrame.from_dict(
-            {k: v * factor for k, v in r["Expenses"].items()},
-            orient="index",
-            columns=["Amount"]
-        )
-
-        st.bar_chart(expense_df)
-
-        # ================= CASH REQUIRED =================
         st.markdown("### 💰 Cash Required at Closing")
         st.write(f"Down Payment: ${r['Down Payment']:,.0f}")
         st.write(f"Rehab Budget: ${rehab_cost:,.0f}")
         st.write(f"Closing Costs: ${r['Closing Costs']:,.0f}")
-        st.write(f"**Total Cash Needed:** ${r['Cash Needed']:,.0f}")
+        st.write(f"**Total Cash Needed:** ${r['Total Cash Needed']:,.0f}")
         st.write(f"Cash Needed as % of ARV: {r['Cash % ARV']:.1%}")
 
     else:
@@ -196,5 +184,4 @@ st.caption(
     "constitute financial, investment, legal, tax, or real estate advice. "
     "All results are estimates. Users should conduct their own due diligence."
 )
-
 
