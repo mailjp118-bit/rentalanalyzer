@@ -15,7 +15,7 @@ with top_left:
 
 with top_middle:
     breakdown_view = st.selectbox(
-        "📊 Deal Results View",
+        "📊 View Mode",
         ["Annual", "Monthly"],
         index=0
     )
@@ -173,10 +173,14 @@ with col3:
     if "results" in st.session_state:
         r = st.session_state.results
 
-        for name, value in r["Expenses Annual"].items():
-            st.write(f"**{name}**: ${value:,.0f}")
-
-        st.write(f"**Total Expenses:** ${r['Total Expenses Annual']:,.0f}")
+        if breakdown_view == "Annual":
+            for name, value in r["Expenses Annual"].items():
+                st.write(f"**{name}**: ${value:,.0f}")
+            st.write(f"**Total Expenses:** ${r['Total Expenses Annual']:,.0f}")
+        else:
+            for name, value in r["Expenses Annual"].items():
+                st.write(f"**{name}**: ${value/12:,.0f}")
+            st.write(f"**Total Expenses:** ${r['Total Expenses Annual']/12:,.0f}")
 
         st.markdown("### 💰 Cash Required at Closing")
         st.write(f"Down Payment: ${r['Down Payment']:,.0f}")
