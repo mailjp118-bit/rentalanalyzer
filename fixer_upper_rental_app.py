@@ -24,16 +24,6 @@ with top_right:
     excel_btn = st.empty()
     pdf_btn = st.empty()
 
-# ================= INTRO TEXT (NEW) =================
-st.markdown("""
-### Free Rental Deal Analyzer
-
-Analyze rental properties in seconds.  
-Calculate **cash flow, cap rate, cash-on-cash return, equity, and deal score** — all in one place.
-
-Built for beginner and experienced real estate investors.
-""")
-
 # ================= PRIVACY MESSAGE =================
 st.markdown(
     """
@@ -112,7 +102,6 @@ if analyze:
     cap_rate = noi_annual / total_investment if total_investment else 0
     coc_return = cash_flow_annual / cash_invested if cash_invested else 0
     equity_pct = (arv - total_investment) / arv if arv else 0
-    rent_to_price = annual_rent / purchase_price if purchase_price else 0
 
     deal_score = min(
         100,
@@ -142,7 +131,6 @@ if analyze:
         "Debt Monthly": monthly_payment,
         "Cap Rate": cap_rate,
         "CoC": coc_return,
-        "Rent to Price": rent_to_price,
         "Equity": equity_pct,
         "Score": deal_score,
         "Rating": rating,
@@ -161,12 +149,82 @@ with col2:
     if "results" in st.session_state:
         r = st.session_state.results
 
-        st.metric("Cap Rate", f"{r['Cap Rate']:.2%}")
-        st.metric("Cash-on-Cash Return", f"{r['CoC']:.2%}")
-        st.metric("Rent-to-Price Ratio", f"{r['Rent to Price']:.2%}")
-        st.metric("Equity %", f"{r['Equity']:.2%}")
-        st.metric("Rental Deal Score", f"{r['Score']:.0f}/100")
+        if breakdown_view == "Annual":
+            st.metric("Rent", f"${r['Annual Rent']:,.0f}", help="Total gross rental income per year.")
+            st.metric("NOI", f"${r['NOI Annual']:,.0f}", help="Net Operating Income before debt service.")
+            st.metric("Cash Flow", f"${r['Cash Flow Annual']:,.0f}", help="Annual cash remaining after all expenses and debt service.")
+            st.metric("Debt Service", f"${r['Debt Annual']:,.0f}", help="Total annual mortgage payments (principal + interest).")
+        else:
+            st.metric("Rent", f"${r['Monthly Rent']:,.0f}", help="Gross rental income per month.")
+            st.metric("NOI", f"${r['NOI Annual']/12:,.0f}", help="Monthly Net Operating Income before debt service.")
+            st.metric("Cash Flow", f"${r['Cash Flow Annual']/12:,.0f}", help="Monthly cash remaining after expenses and debt service.")
+            st.metric("Debt Service", f"${r['Debt Monthly']:,.0f}", help="Monthly mortgage payment (principal + interest).")
+
+        st.metric("Cap Rate", f"{r['Cap Rate']:.2%}", help="NOI divided by total investment cost.")
+        st.metric("Cash-on-Cash Return", f"{r['CoC']:.2%}", help="Annual cash flow divided by cash invested.")
+        st.metric("Equity %", f"{r['Equity']:.2%}", help="Percentage of property value owned after purchase and rehab.")
+        st.metric("Rental Deal Score", f"{r['Score']:.0f}/100", help="Overall deal strength score based on returns and equity.")
         st.subheader(r["Rating"])
+
+# ================= RIGHT COLUMN — EXPENSES + CASH =================
+with col3:
+    st.header("💸 Expense Breakdown")
+
+    if "results" in st.session_state:
+        r = st.session_state.results
+
+        if breakdown_view == "Annual":
+            for name, value in r["Expenses Annual"].items():
+                st.write(f"**{name}**: ${value:,.0f}")
+            st.write(f"**Total Expenses:** ${r['Total Expenses Annual']:,.0f}")
+        else:
+            for name, value in r["Expenses Annual"].items():
+                st.write(f"**{name}**: ${value/12:,.0f}")
+            st.write(f"**Total Expenses:** ${r['Total Expenses Annual']/12:,.0f}")
+
+        st.subheader("💰 Cash Required at Closing")
+
+        st.write(f"Down Payment: ${r['Down Payment']:,.0f}")
+        st.write(f"Rehab Budget: ${rehab_cost:,.0f}")
+        st.write(f"Closing Costs: ${r['Closing Costs']:,.0f}")
+        st.write(f"**Total Cash Needed:** ${r['Total Cash Needed']:,.0f}")
+        st.write(f"Cash Needed as % of ARV: {r['Cash % ARV']:.1%}")
+
+# ================= DOWNLOAD BUTTONS =================
+if "results" in st.session_state:
+    df = pd.DataFrame.from_dict(st.session_state.results, orient="index", columns=["Value"])
+
+    excel_buffer = BytesIO()
+    df.to_excel(excel_buffer)
+    excel_buffer.seek(0)
+
+    excel_btn.download_button(
+        "⬇️ Download Excel",
+        excel_buffer,
+        "rental_deal_analysis.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+    pdf_buffer = BytesIO()
+    c = canvas.Canvas(pdf_buffer, pagesize=letter)
+    y = 750
+
+    for k, v in st.session_state.results.items():
+        c.drawString(40, y, f"{k}: {v}")
+        y -= 18
+        if y < 50:
+            c.showPage()
+            y = 750
+
+    c.save()
+    pdf_buffer.seek(0)
+
+    pdf_btn.download_button(
+        "⬇️ Download PDF",
+        pdf_buffer,
+        "rental_deal_analysis.pdf",
+        mime="application/pdf"
+    )
 
 # ================= DISCLAIMER =================
 st.markdown("---")
@@ -175,3 +233,4 @@ st.caption(
     "constitute financial, investment, legal, tax, or real estate advice. "
     "All outputs are estimates, and use of this tool is at your own risk."
 )
+
