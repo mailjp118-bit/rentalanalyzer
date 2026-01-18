@@ -3,13 +3,13 @@ import pandas as pd
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+
+# ================= PAGE CONFIG =================
+st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
 st.markdown("""
 ### Know if a rental deal works — Fast & Free.  
 Get **cash flow, cap rate, cash-on-cash return, deal score and much more** instantly.
 """)
-
-# ================= PAGE CONFIG =================
-st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
 
 # ================= TOP BAR =================
 top_left, top_middle, top_right = st.columns([5, 2, 2])
@@ -237,5 +237,6 @@ st.caption(
     "constitute financial, investment, legal, tax, or real estate advice. "
     "All outputs are estimates, and use of this tool is at your own risk."
 )
+
 
 
