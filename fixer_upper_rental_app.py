@@ -1,4 +1,3 @@
-st.error("DEBUG: PRIVATE REPO TEST — v2")
 import streamlit as st
 import pandas as pd
 from io import BytesIO
@@ -104,9 +103,6 @@ if analyze:
     coc_return = cash_flow_annual / cash_invested if cash_invested else 0
     equity_pct = (arv - total_investment) / arv if arv else 0
 
-    ➕ Rent-to-Price Ratio
-    rent_to_price = monthly_rent / purchase_price if purchase_price else 0
-
     deal_score = min(
         100,
         (coc_return / 0.15 * 40) +
@@ -135,7 +131,6 @@ if analyze:
         "Debt Monthly": monthly_payment,
         "Cap Rate": cap_rate,
         "CoC": coc_return,
-        "Rent-to-Price": rent_to_price,
         "Equity": equity_pct,
         "Score": deal_score,
         "Rating": rating,
@@ -155,21 +150,20 @@ with col2:
         r = st.session_state.results
 
         if breakdown_view == "Annual":
-            st.metric("Rent", f"${r['Annual Rent']:,.0f}")
-            st.metric("NOI", f"${r['NOI Annual']:,.0f}")
-            st.metric("Cash Flow", f"${r['Cash Flow Annual']:,.0f}")
-            st.metric("Debt Service", f"${r['Debt Annual']:,.0f}")
+            st.metric("Rent", f"${r['Annual Rent']:,.0f}", help="Total gross rental income per year.")
+            st.metric("NOI", f"${r['NOI Annual']:,.0f}", help="Net Operating Income before debt service.")
+            st.metric("Cash Flow", f"${r['Cash Flow Annual']:,.0f}", help="Annual cash remaining after all expenses and debt service.")
+            st.metric("Debt Service", f"${r['Debt Annual']:,.0f}", help="Total annual mortgage payments (principal + interest).")
         else:
-            st.metric("Rent", f"${r['Monthly Rent']:,.0f}")
-            st.metric("NOI", f"${r['NOI Annual']/12:,.0f}")
-            st.metric("Cash Flow", f"${r['Cash Flow Annual']/12:,.0f}")
-            st.metric("Debt Service", f"${r['Debt Monthly']:,.0f}")
+            st.metric("Rent", f"${r['Monthly Rent']:,.0f}", help="Gross rental income per month.")
+            st.metric("NOI", f"${r['NOI Annual']/12:,.0f}", help="Monthly Net Operating Income before debt service.")
+            st.metric("Cash Flow", f"${r['Cash Flow Annual']/12:,.0f}", help="Monthly cash remaining after expenses and debt service.")
+            st.metric("Debt Service", f"${r['Debt Monthly']:,.0f}", help="Monthly mortgage payment (principal + interest).")
 
-        st.metric("Cap Rate", f"{r['Cap Rate']:.2%}")
-        st.metric("Cash-on-Cash Return", f"{r['CoC']:.2%}")
-        st.metric("Rent-to-Price Ratio", f"{r['Rent-to-Price']:.2%}")
-        st.metric("Equity %", f"{r['Equity']:.2%}")
-        st.metric("Rental Deal Score", f"{r['Score']:.0f}/100")
+        st.metric("Cap Rate", f"{r['Cap Rate']:.2%}", help="NOI divided by total investment cost.")
+        st.metric("Cash-on-Cash Return", f"{r['CoC']:.2%}", help="Annual cash flow divided by cash invested.")
+        st.metric("Equity %", f"{r['Equity']:.2%}", help="Percentage of property value owned after purchase and rehab.")
+        st.metric("Rental Deal Score", f"{r['Score']:.0f}/100", help="Overall deal strength score based on returns and equity.")
         st.subheader(r["Rating"])
 
 # ================= RIGHT COLUMN — EXPENSES + CASH =================
@@ -239,5 +233,4 @@ st.caption(
     "constitute financial, investment, legal, tax, or real estate advice. "
     "All outputs are estimates, and use of this tool is at your own risk."
 )
-
 
