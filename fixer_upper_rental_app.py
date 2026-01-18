@@ -163,7 +163,7 @@ with col2:
         st.metric("Cap Rate", f"{r['Cap Rate']:.2%}", help="NOI divided by total investment cost.")
         st.metric("Cash-on-Cash Return", f"{r['CoC']:.2%}", help="Annual cash flow divided by cash invested.")
         st.metric("Equity %", f"{r['Equity']:.2%}", help="Percentage of property value owned after purchase and rehab.")
-        st.metric("Rental Deal Score", f"{r['Score']:.0f}/100", help="Overall deal strength score based on returns and equity.")
+        st.metric("Rental Deal Score", f"{r['Score']:.0f}/100", help="A 0–100 rating that combines cash-on-cash return, cap rate, and built-in equity to show how profitable and safe a rental deal is overall—higher means a better deal.")
         st.subheader(r["Rating"])
 
 # ================= RIGHT COLUMN — EXPENSES + CASH =================
@@ -233,3 +233,4 @@ st.caption(
     "constitute financial, investment, legal, tax, or real estate advice. "
     "All outputs are estimates, and use of this tool is at your own risk."
 )
+
