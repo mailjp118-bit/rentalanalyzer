@@ -1,3 +1,7 @@
+st.markdown("""
+<meta name="description" content="Free rental property deal analyzer to calculate cash flow, cap rate, cash-on-cash return, and rental deal score. Evaluate rental homes instantly.">
+<meta name="keywords" content="rental deal analyzer, real estate investment calculator, cap rate calculator, cash on cash return, rental property analysis">
+""", unsafe_allow_html=True)
 import streamlit as st
 import pandas as pd
 from io import BytesIO
@@ -233,4 +237,5 @@ st.caption(
     "constitute financial, investment, legal, tax, or real estate advice. "
     "All outputs are estimates, and use of this tool is at your own risk."
 )
+
 
