@@ -103,6 +103,9 @@ if analyze:
     coc_return = cash_flow_annual / cash_invested if cash_invested else 0
     equity_pct = (arv - total_investment) / arv if arv else 0
 
+    # ➕ Rent-to-Price Ratio
+    rent_to_price = monthly_rent / purchase_price if purchase_price else 0
+
     deal_score = min(
         100,
         (coc_return / 0.15 * 40) +
@@ -122,9 +125,6 @@ if analyze:
     total_cash_needed = down_payment + rehab_cost + closing_costs
     cash_pct_arv = total_cash_needed / arv if arv else 0
 
-    # ➕ Rent-to-Price Ratio
-    rent_to_price = monthly_rent / purchase_price if purchase_price else 0
-
     st.session_state.results = {
         "Annual Rent": annual_rent,
         "Monthly Rent": monthly_rent,
@@ -134,8 +134,8 @@ if analyze:
         "Debt Monthly": monthly_payment,
         "Cap Rate": cap_rate,
         "CoC": coc_return,
+        "Rent-to-Price": rent_to_price,
         "Equity": equity_pct,
-        "Rent-to-Price Ratio": rent_to_price,
         "Score": deal_score,
         "Rating": rating,
         "Expenses Annual": expenses_annual,
@@ -157,27 +157,18 @@ with col2:
             st.metric("Rent", f"${r['Annual Rent']:,.0f}")
             st.metric("NOI", f"${r['NOI Annual']:,.0f}")
             st.metric("Cash Flow", f"${r['Cash Flow Annual']:,.0f}")
+            st.metric("Debt Service", f"${r['Debt Annual']:,.0f}")
         else:
             st.metric("Rent", f"${r['Monthly Rent']:,.0f}")
             st.metric("NOI", f"${r['NOI Annual']/12:,.0f}")
             st.metric("Cash Flow", f"${r['Cash Flow Annual']/12:,.0f}")
+            st.metric("Debt Service", f"${r['Debt Monthly']:,.0f}")
 
         st.metric("Cap Rate", f"{r['Cap Rate']:.2%}")
         st.metric("Cash-on-Cash Return", f"{r['CoC']:.2%}")
+        st.metric("Rent-to-Price Ratio", f"{r['Rent-to-Price']:.2%}")
         st.metric("Equity %", f"{r['Equity']:.2%}")
         st.metric("Rental Deal Score", f"{r['Score']:.0f}/100")
-
-        # ✅ Rent-to-Price Ratio Indicator (NEW)
-        st.markdown("### 🏠 Rent-to-Price Ratio")
-        st.write(f"**Ratio:** {r['Rent-to-Price Ratio']:.2%}")
-
-        if r["Rent-to-Price Ratio"] >= 0.01:
-            st.success("🟢 Strong — Meets or exceeds the 1% rule")
-        elif r["Rent-to-Price Ratio"] >= 0.007:
-            st.warning("🟡 Average — May work depending on expenses")
-        else:
-            st.error("🔴 Weak — Likely relies on appreciation")
-
         st.subheader(r["Rating"])
 
 # ================= RIGHT COLUMN — EXPENSES + CASH =================
@@ -187,12 +178,17 @@ with col3:
     if "results" in st.session_state:
         r = st.session_state.results
 
-        for name, value in r["Expenses Annual"].items():
-            st.write(f"**{name}**: ${value:,.0f}")
-
-        st.write(f"**Total Expenses:** ${r['Total Expenses Annual']:,.0f}")
+        if breakdown_view == "Annual":
+            for name, value in r["Expenses Annual"].items():
+                st.write(f"**{name}**: ${value:,.0f}")
+            st.write(f"**Total Expenses:** ${r['Total Expenses Annual']:,.0f}")
+        else:
+            for name, value in r["Expenses Annual"].items():
+                st.write(f"**{name}**: ${value/12:,.0f}")
+            st.write(f"**Total Expenses:** ${r['Total Expenses Annual']/12:,.0f}")
 
         st.subheader("💰 Cash Required at Closing")
+
         st.write(f"Down Payment: ${r['Down Payment']:,.0f}")
         st.write(f"Rehab Budget: ${rehab_cost:,.0f}")
         st.write(f"Closing Costs: ${r['Closing Costs']:,.0f}")
