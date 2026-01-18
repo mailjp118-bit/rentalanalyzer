@@ -103,7 +103,7 @@ if analyze:
     coc_return = cash_flow_annual / cash_invested if cash_invested else 0
     equity_pct = (arv - total_investment) / arv if arv else 0
 
-    # ➕ Rent-to-Price Ratio
+    ➕ Rent-to-Price Ratio
     rent_to_price = monthly_rent / purchase_price if purchase_price else 0
 
     deal_score = min(
@@ -238,3 +238,4 @@ st.caption(
     "constitute financial, investment, legal, tax, or real estate advice. "
     "All outputs are estimates, and use of this tool is at your own risk."
 )
+
