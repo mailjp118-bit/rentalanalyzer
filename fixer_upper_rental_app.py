@@ -7,24 +7,6 @@ from reportlab.pdfgen import canvas
 # ================= PAGE CONFIG (MUST BE FIRST STREAMLIT CALL) =================
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
 #st.image("assets/logo2.png", use_container_width=True)
-st.markdown(
-    """
-    <style>
-    .thin-logo img {
-        height: 200px;      /* adjust: 40–70px works well */
-        width: 100%;
-        object-fit: contain;
-        margin-bottom: 50px;
-    }
-    </style>
-
-    <div class="thin-logo">
-        <img src="assets/logo2.png">
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
 
 # ================= GOOGLE ANALYTICS =================
 st.markdown("""
