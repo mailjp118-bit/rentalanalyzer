@@ -3,22 +3,26 @@ import pandas as pd
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+import streamlit.components.v1 as components
 
 # ================= PAGE CONFIG (MUST BE FIRST STREAMLIT CALL) =================
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
 #st.image("assets/logo2.png", use_container_width=True)
 
 # ================= GOOGLE ANALYTICS =================
-st.markdown("""
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-DMLKRR0K9P"></script>
-<script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-DMLKRR0K9P');
-</script>
-""", unsafe_allow_html=True)
+components.html(
+    """
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DMLKRR0K9P"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-DMLKRR0K9P', { 'send_page_view': true });
+    </script>
+    """,
+    height=0,
+)
 
 # ================= PAGE CONFIG =================
 #st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
