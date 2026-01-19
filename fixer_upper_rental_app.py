@@ -30,9 +30,9 @@ with top_left:
     st.markdown(
         """
         <h1 style="font-weight:700; margin-bottom:0;">
-            <span style="color:#E53935;">R</span>ental
-            <span style="color:#2E7D32;">D</span>eal
-            <span style="color:#1E88E5;">A</span>nalyzer
+            <span style="color:#E53935;">Rental</span>
+            <span style="color:#1E88E5;">Deal</span>
+            <span style="color:#2E7D32;">Analyzer</span>
         </h1>
         """,
         unsafe_allow_html=True
@@ -41,6 +41,7 @@ with top_left:
 ### Know if a rental deal works — Fast & Free.  
 Get **cash flow, cap rate, cash-on-cash return, deal score and much more** instantly.
 """)
+
 
 
 with top_middle:
