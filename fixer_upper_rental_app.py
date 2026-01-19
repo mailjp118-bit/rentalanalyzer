@@ -6,7 +6,7 @@ from reportlab.pdfgen import canvas
 
 # ================= PAGE CONFIG (MUST BE FIRST STREAMLIT CALL) =================
 #st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
-st.image("assets/logo.png", use_container_width=True)
+st.image("rentalanalyzer/logo.png", use_container_width=True)
 
 # ================= GOOGLE ANALYTICS =================
 st.markdown("""
@@ -259,5 +259,6 @@ st.caption(
     "constitute financial, investment, legal, tax, or real estate advice. "
     "All outputs are estimates, and use of this tool is at your own risk."
 )
+
 
 
