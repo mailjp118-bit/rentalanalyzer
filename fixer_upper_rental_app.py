@@ -8,16 +8,15 @@ from reportlab.pdfgen import canvas
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
 
 # ================= GOOGLE ANALYTICS =================
-st.markdown("""
-<!-- Google Analytics -->
+<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DMLKRR0K9P"></script>
 <script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-DMLKRR0K9P');
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-DMLKRR0K9P');
 </script>
-""", unsafe_allow_html=True)
 
 # ================= PAGE CONFIG =================
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
@@ -252,6 +251,7 @@ st.caption(
     "constitute financial, investment, legal, tax, or real estate advice. "
     "All outputs are estimates, and use of this tool is at your own risk."
 )
+
 
 
 
