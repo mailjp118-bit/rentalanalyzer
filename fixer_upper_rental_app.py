@@ -42,6 +42,12 @@ with top_middle:
 with top_right:
     excel_btn = st.empty()
     pdf_btn = st.empty()
+    st.markdown(
+        "<div style='text-align:right; font-size:14px;'>"
+        "📧 Email: <a href='mailto:email@rentaldealanalyzer.com'>"
+        "email@rentaldealanalyzer.com</a></div>",
+        unsafe_allow_html=True
+    )
 
 # ================= PRIVACY MESSAGE =================
 st.markdown(
@@ -252,12 +258,3 @@ st.caption(
     "constitute financial, investment, legal, tax, or real estate advice. "
     "All outputs are estimates, and use of this tool is at your own risk."
 )
-
-
-
-
-
-
-
-
-
