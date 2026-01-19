@@ -11,10 +11,10 @@ st.markdown(
     """
     <style>
     .thin-logo img {
-        height: 60px;      /* adjust: 40–70px works well */
+        height: 200px;      /* adjust: 40–70px works well */
         width: 100%;
         object-fit: contain;
-        margin-bottom: 10px;
+        margin-bottom: 50px;
     }
     </style>
 
