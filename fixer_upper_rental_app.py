@@ -5,7 +5,9 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
 # ================= PAGE CONFIG (MUST BE FIRST STREAMLIT CALL) =================
-#st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
+st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
+
+# ================= TOP LOGO =================
 st.image("assets/logo.png", use_container_width=True)
 
 # ================= GOOGLE ANALYTICS =================
@@ -20,14 +22,12 @@ gtag('config', 'G-DMLKRR0K9P');
 </script>
 """, unsafe_allow_html=True)
 
-# ================= PAGE CONFIG =================
-#st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
-
 # ================= TOP BAR =================
 top_left, top_middle, top_right = st.columns([5, 2, 2])
 
 with top_left:
-    st.title("🏚️ Rental Deal Analyzer")
+    # 🔁 TITLE REPLACED WITH LOGO (SIMILAR SIZE)
+    st.image("assets/logo.png", width=260)
     st.markdown("""
 ### Know if a rental deal works — Fast & Free.  
 Get **cash flow, cap rate, cash-on-cash return, deal score and much more** instantly.
@@ -176,20 +176,20 @@ with col2:
         r = st.session_state.results
 
         if breakdown_view == "Annual":
-            st.metric("Rent", f"${r['Annual Rent']:,.0f}", help="Total gross rental income per year.")
-            st.metric("NOI", f"${r['NOI Annual']:,.0f}", help="Net Operating Income before debt service.")
-            st.metric("Cash Flow", f"${r['Cash Flow Annual']:,.0f}", help="Annual cash remaining after all expenses and debt service.")
-            st.metric("Debt Service", f"${r['Debt Annual']:,.0f}", help="Total annual mortgage payments (principal + interest).")
+            st.metric("Rent", f"${r['Annual Rent']:,.0f}")
+            st.metric("NOI", f"${r['NOI Annual']:,.0f}")
+            st.metric("Cash Flow", f"${r['Cash Flow Annual']:,.0f}")
+            st.metric("Debt Service", f"${r['Debt Annual']:,.0f}")
         else:
-            st.metric("Rent", f"${r['Monthly Rent']:,.0f}", help="Gross rental income per month.")
-            st.metric("NOI", f"${r['NOI Annual']/12:,.0f}", help="Monthly Net Operating Income before debt service.")
-            st.metric("Cash Flow", f"${r['Cash Flow Annual']/12:,.0f}", help="Monthly cash remaining after expenses and debt service.")
-            st.metric("Debt Service", f"${r['Debt Monthly']:,.0f}", help="Monthly mortgage payment (principal + interest).")
+            st.metric("Rent", f"${r['Monthly Rent']:,.0f}")
+            st.metric("NOI", f"${r['NOI Annual']/12:,.0f}")
+            st.metric("Cash Flow", f"${r['Cash Flow Annual']/12:,.0f}")
+            st.metric("Debt Service", f"${r['Debt Monthly']:,.0f}")
 
-        st.metric("Cap Rate", f"{r['Cap Rate']:.2%}", help="NOI divided by total investment cost.")
-        st.metric("Cash-on-Cash Return", f"{r['CoC']:.2%}", help="Annual cash flow divided by cash invested.")
-        st.metric("Equity %", f"{r['Equity']:.2%}", help="Percentage of property value owned after purchase and rehab.")
-        st.metric("Rental Deal Score", f"{r['Score']:.0f}/100", help="Overall deal strength score based on returns and equity.")
+        st.metric("Cap Rate", f"{r['Cap Rate']:.2%}")
+        st.metric("Cash-on-Cash Return", f"{r['CoC']:.2%}")
+        st.metric("Equity %", f"{r['Equity']:.2%}")
+        st.metric("Rental Deal Score", f"{r['Score']:.0f}/100")
         st.subheader(r["Rating"])
 
 # ================= RIGHT COLUMN — EXPENSES + CASH =================
@@ -199,14 +199,10 @@ with col3:
     if "results" in st.session_state:
         r = st.session_state.results
 
-        if breakdown_view == "Annual":
-            for name, value in r["Expenses Annual"].items():
-                st.write(f"**{name}**: ${value:,.0f}")
-            st.write(f"**Total Expenses:** ${r['Total Expenses Annual']:,.0f}")
-        else:
-            for name, value in r["Expenses Annual"].items():
-                st.write(f"**{name}**: ${value/12:,.0f}")
-            st.write(f"**Total Expenses:** ${r['Total Expenses Annual']/12:,.0f}")
+        for name, value in r["Expenses Annual"].items():
+            st.write(f"**{name}**: ${value:,.0f}")
+
+        st.write(f"**Total Expenses:** ${r['Total Expenses Annual']:,.0f}")
 
         st.subheader("💰 Cash Required at Closing")
 
@@ -227,8 +223,7 @@ if "results" in st.session_state:
     excel_btn.download_button(
         "⬇️ Download Excel",
         excel_buffer,
-        "rental_deal_analysis.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        "rental_deal_analysis.xlsx"
     )
 
     pdf_buffer = BytesIO()
@@ -238,9 +233,6 @@ if "results" in st.session_state:
     for k, v in st.session_state.results.items():
         c.drawString(40, y, f"{k}: {v}")
         y -= 18
-        if y < 50:
-            c.showPage()
-            y = 750
 
     c.save()
     pdf_buffer.seek(0)
@@ -248,15 +240,12 @@ if "results" in st.session_state:
     pdf_btn.download_button(
         "⬇️ Download PDF",
         pdf_buffer,
-        "rental_deal_analysis.pdf",
-        mime="application/pdf"
+        "rental_deal_analysis.pdf"
     )
 
 # ================= DISCLAIMER =================
 st.markdown("---")
 st.caption(
     "Disclaimer: This tool is for educational and informational purposes only and does not "
-    "constitute financial, investment, legal, tax, or real estate advice. "
-    "All outputs are estimates, and use of this tool is at your own risk."
+    "constitute financial, investment, legal, tax, or real estate advice."
 )
-
