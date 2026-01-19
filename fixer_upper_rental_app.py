@@ -27,24 +27,22 @@ gtag('config', 'G-DMLKRR0K9P');
 top_left, top_middle, top_right = st.columns([5, 2, 2])
 
 with top_left:
-    logo_col, title_col = st.columns([1, 9])
-    with logo_col:
-        st.image("assets/newlogo.png", width=55)
-    with title_col:
-        st.markdown(
-            """
-            <h1 style="font-weight:700; margin-bottom:0;">
-                <span style="color:#E53935;">Rental</span>
-                <span style="color:#1E88E5;">Deal</span>
-                <span style="color:#2E7D32;">Analyzer</span>
-            </h1>
-            """,
-            unsafe_allow_html=True
-        )
+    st.markdown(
+        """
+        <h1 style="font-weight:700; margin-bottom:0;">
+            <span style="color:#E53935;">Rental</span>
+            <span style="color:#1E88E5;">Deal</span>
+            <span style="color:#2E7D32;">Analyzer</span>
+        </h1>
+        """,
+        unsafe_allow_html=True
+    )
     st.markdown("""
 ### Know if a rental deal works — Fast & Free.  
 Get **cash flow, cap rate, cash-on-cash return, deal score and much more** instantly.
 """)
+
+
 
 with top_middle:
     breakdown_view = st.selectbox(
