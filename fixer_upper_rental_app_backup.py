@@ -6,6 +6,7 @@ from reportlab.pdfgen import canvas
 
 # ================= PAGE CONFIG (MUST BE FIRST STREAMLIT CALL) =================
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
+#st.image("assets/logo.png", use_container_width=True)
 
 # ================= GOOGLE ANALYTICS =================
 st.markdown("""
@@ -20,7 +21,7 @@ gtag('config', 'G-DMLKRR0K9P');
 """, unsafe_allow_html=True)
 
 # ================= PAGE CONFIG =================
-st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
+#st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
 
 # ================= TOP BAR =================
 top_left, top_middle, top_right = st.columns([5, 2, 2])
@@ -42,6 +43,12 @@ with top_middle:
 with top_right:
     excel_btn = st.empty()
     pdf_btn = st.empty()
+    st.markdown(
+        "<div style='font-size:14px; margin-top:4px;'>"
+        "📧 Email: <a href='mailto:email@rentaldealanalyzer.com'>"
+        "email@rentaldealanalyzer.com</a></div>",
+        unsafe_allow_html=True
+    )
 
 # ================= PRIVACY MESSAGE =================
 st.markdown(
@@ -252,11 +259,3 @@ st.caption(
     "constitute financial, investment, legal, tax, or real estate advice. "
     "All outputs are estimates, and use of this tool is at your own risk."
 )
-
-
-
-
-
-
-
-
