@@ -8,15 +8,16 @@ from reportlab.pdfgen import canvas
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
 
 # ================= GOOGLE ANALYTICS =================
-<!-- Google tag (gtag.js) -->
+st.markdown("""
+<!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DMLKRR0K9P"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-DMLKRR0K9P');
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-DMLKRR0K9P');
 </script>
+""", unsafe_allow_html=True)
 
 # ================= PAGE CONFIG =================
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
