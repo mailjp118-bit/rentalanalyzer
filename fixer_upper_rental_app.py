@@ -5,8 +5,8 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
 # ================= PAGE CONFIG (MUST BE FIRST STREAMLIT CALL) =================
-#st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
-st.image("assets/logo.png", use_container_width=True)
+st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
+#st.image("assets/logo.png", use_container_width=True)
 
 # ================= GOOGLE ANALYTICS =================
 st.markdown("""
