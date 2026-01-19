@@ -6,7 +6,7 @@ from reportlab.pdfgen import canvas
 
 st.markdown("""
 <!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-ABC123XYZ9"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DMLKRR0K9P"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
@@ -249,6 +249,7 @@ st.caption(
     "constitute financial, investment, legal, tax, or real estate advice. "
     "All outputs are estimates, and use of this tool is at your own risk."
 )
+
 
 
 
