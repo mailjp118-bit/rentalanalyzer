@@ -1,27 +1,168 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rental Deal Analyzer</title>
-  <meta name="description" content="Free rental property deal analyzer. Calculate cash flow, cap rate, and ROI instantly.">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Free rental property deal analyzer. Calculate cash flow, cap rate, cash-on-cash return, equity, and deal score instantly." />
+  <style>
+    :root{
+      --bg:#0b1020;
+      --card:#121a33;
+      --text:#eaf0ff;
+      --muted:#b9c3ff;
+      --accent:#1E88E5;
+      --accent2:#2E7D32;
+      --border:rgba(255,255,255,.10);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1000px 600px at 20% 10%, rgba(30,136,229,.25), transparent 60%),
+                  radial-gradient(900px 500px at 80% 30%, rgba(46,125,50,.20), transparent 60%),
+                  var(--bg);
+      color: var(--text);
+    }
+    .wrap{max-width:1100px; margin:0 auto; padding:28px 18px 70px;}
+    .nav{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 0 24px;
+    }
+    .brand{display:flex; align-items:center; gap:12px; font-weight:800; letter-spacing:.2px;}
+    .logo{
+      width:38px; height:38px; border-radius:12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display:inline-block;
+    }
+    .nav a{color:var(--muted); text-decoration:none; margin-left:14px; font-weight:600;}
+    .nav a:hover{color:var(--text)}
+    .hero{
+      display:grid; grid-template-columns: 1.25fr .75fr; gap:22px;
+      align-items:stretch;
+    }
+    @media (max-width:900px){ .hero{grid-template-columns:1fr;} }
+    .panel{
+      background: rgba(18,26,51,.72);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:28px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+      backdrop-filter: blur(10px);
+    }
+    h1{margin:0 0 10px; font-size:42px; line-height:1.1;}
+    .sub{margin:0 0 18px; color:var(--muted); font-size:16px; line-height:1.6;}
+    .ctaRow{display:flex; gap:12px; flex-wrap:wrap; margin-top:18px;}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:12px 16px; border-radius:12px;
+      font-weight:800; text-decoration:none;
+      border:1px solid var(--border);
+    }
+    .primary{background:var(--accent); color:white; border-color:transparent;}
+    .primary:hover{filter:brightness(1.05)}
+    .ghost{background:transparent; color:var(--text);}
+    .ghost:hover{background:rgba(255,255,255,.06)}
+    .grid{
+      display:grid; grid-template-columns: repeat(3, 1fr);
+      gap:14px; margin-top:18px;
+    }
+    @media (max-width:900px){ .grid{grid-template-columns:1fr;} }
+    .card{
+      background: rgba(255,255,255,.04);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px;
+    }
+    .card h3{margin:0 0 6px; font-size:16px;}
+    .card p{margin:0; color:var(--muted); font-size:14px; line-height:1.5;}
+    .side h2{margin:0 0 10px; font-size:18px;}
+    .list{margin:0; padding-left:18px; color:var(--muted); line-height:1.7;}
+    .footer{margin-top:30px; color:rgba(255,255,255,.65); font-size:13px;}
+    .tiny{font-size:12px; color:rgba(255,255,255,.55); margin-top:10px;}
+    .tag{
+      display:inline-block; padding:6px 10px; border-radius:999px;
+      background:rgba(30,136,229,.18); border:1px solid rgba(30,136,229,.25);
+      color:#dbe9ff; font-weight:700; font-size:12px;
+      margin-bottom:12px;
+    }
+  </style>
 </head>
-<body style="font-family:Arial, sans-serif; text-align:center; padding:40px;">
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <div class="brand">
+        <span class="logo"></span>
+        <span>Rental Deal Analyzer</span>
+      </div>
+      <div>
+        <a href="#features">Features</a>
+        <a href="#faq">FAQ</a>
+        <a href="mailto:email@rentaldealanalyzer.com">Contact</a>
+      </div>
+    </div>
 
-  <h1>Rental Deal Analyzer</h1>
-  <p>Analyze rental property deals in seconds.</p>
+    <div class="hero">
+      <div class="panel">
+        <div class="tag">Free • Fast • Beginner-friendly</div>
+        <h1>Know if a rental deal works — in seconds.</h1>
+        <p class="sub">
+          Analyze rental properties with a simple calculator that shows cash flow, cap rate, cash-on-cash return,
+          equity, and a deal score — all in one place.
+        </p>
 
-  <a href="https://rentdealanalyzer.streamlit.app/"
-     target="_blank"
-     style="
-       display:inline-block;
-       padding:15px 25px;
-       background:#1E88E5;
-       color:white;
-       text-decoration:none;
-       border-radius:6px;
-       font-size:18px;">
-     Open Free Rental Deal Analyzer
-  </a>
+        <div class="ctaRow">
+          <a class="btn primary" href="https://rentdealanalyzer.streamlit.app/" target="_blank">Open Free Calculator</a>
+          <a class="btn ghost" href="#features">See features</a>
+        </div>
 
+        <div id="features" class="grid">
+          <div class="card">
+            <h3>Instant Deal Results</h3>
+            <p>Cash flow, NOI, cap rate, cash-on-cash return, equity %, deal score.</p>
+          </div>
+          <div class="card">
+            <h3>Beginner-friendly</h3>
+            <p>Simple inputs with clear metrics. Great for first-time investors.</p>
+          </div>
+          <div class="card">
+            <h3>Export & Share</h3>
+            <p>Download your results to Excel/PDF from the calculator.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel side">
+        <h2>What you can calculate</h2>
+        <ul class="list">
+          <li>Cash flow (monthly/annual)</li>
+          <li>Net operating income (NOI)</li>
+          <li>Cap rate</li>
+          <li>Cash-on-cash return</li>
+          <li>Equity % based on ARV</li>
+          <li>Deal score (0–100)</li>
+        </ul>
+
+        <div style="height:14px"></div>
+        <h2 id="faq">FAQ</h2>
+        <p class="sub"><strong>Is it free?</strong><br/>Yes — the calculator is free to use.</p>
+        <p class="sub"><strong>Do you store my data?</strong><br/>No. Calculations run in real-time and reset on refresh.</p>
+        <p class="sub"><strong>Where is the tool?</strong><br/>Click “Open Free Calculator” to launch the app.</p>
+
+        <div class="tiny">
+          Contact: <a style="color:#dbe9ff" href="mailto:email@rentaldealanalyzer.com">email@rentaldealanalyzer.com</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      © <span id="y"></span> RentalDealAnalyzer.com • For educational purposes only.
+      <div class="tiny">Not financial, legal, tax, or investment advice.</div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("y").textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
