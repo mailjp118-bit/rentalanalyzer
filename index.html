@@ -82,13 +82,16 @@
 <body>
   <div class="wrap">
 
-    <!-- Optional: your logo -->
-    <div style="width:100%; text-align:center; margin:10px 0 24px;">
+    <!-- Small logo + title -->
+    <div style="display:flex; align-items:center; gap:12px; margin:10px 0 24px;">
       <img
-        src="assets/newlogo.png"
+        src="assets/circularlogo.png"
         alt="Rental Deal Analyzer Logo"
-        style="width:100%; max-width:1100px; height:auto; display:block; margin:0 auto;"
+        style="width:40px; height:40px; object-fit:contain;"
       />
+      <span style="font-size:28px; font-weight:800; letter-spacing:0.3px;">
+        Rental Deal Analyzer
+      </span>
     </div>
 
     <div class="hero">
@@ -101,16 +104,12 @@
         </p>
 
         <div class="ctaRow">
-          <!-- Button 1: Open Streamlit App -->
           <a class="btn primary" href="https://rentdealanalyzer.streamlit.app/" target="_blank" rel="noopener">
             Open Free Calculator
           </a>
-
-          <!-- Button 2: Download Excel Checklist -->
           <a class="btn primary" href="assets/RentalDealChecklist.xlsx" download>
             Download RentalDealChecklist
           </a>
-
           <a class="btn ghost" href="#features">See features</a>
         </div>
 
