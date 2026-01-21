@@ -3,34 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rental Deal Analyzer</title>
+
+  <title>Rental Deal Analyzer | Free Rental Property Calculator</title>
   <meta name="description" content="Free rental property deal analyzer. Calculate cash flow, cap rate, cash-on-cash return, equity, and deal score instantly." />
+
+  <!-- Favicon / App Icon -->
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
+      <rect width='64' height='64' rx='14' fill='%230b1020'/>
+      <path d='M8 30L32 10L56 30V54H38V40H26V54H8V30Z' fill='%231DA1F2'/>
+      <rect x='22' y='34' width='5' height='10' fill='white'/>
+      <rect x='30' y='30' width='5' height='14' fill='white'/>
+      <rect x='38' y='26' width='5' height='18' fill='white'/>
+    </svg>">
+
+  <link rel="apple-touch-icon"
+    href="data:image/svg+xml,
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
+      <rect width='64' height='64' rx='14' fill='%230b1020'/>
+      <path d='M8 30L32 10L56 30V54H38V40H26V54H8V30Z' fill='%231DA1F2'/>
+    </svg>">
+
   <style>
     :root{
       --bg:#0b1020;
       --card:#121a33;
       --text:#eaf0ff;
       --muted:#b9c3ff;
-      --accent:#1E88E5;
+      --accent:#1DA1F2;     /* Streamlit blue */
       --accent2:#2E7D32;
       --border:rgba(255,255,255,.10);
     }
+
     *{box-sizing:border-box}
+
     body{
       margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: radial-gradient(1000px 600px at 20% 10%, rgba(30,136,229,.25), transparent 60%),
+      background: radial-gradient(1000px 600px at 20% 10%, rgba(29,161,242,.25), transparent 60%),
                   radial-gradient(900px 500px at 80% 30%, rgba(46,125,50,.20), transparent 60%),
                   var(--bg);
       color: var(--text);
     }
+
     .wrap{max-width:1100px; margin:0 auto; padding:28px 18px 70px;}
 
     .hero{
-      display:grid; grid-template-columns: 1.25fr .75fr; gap:22px;
-      align-items:stretch;
+      display:grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap:22px;
     }
-    @media (max-width:900px){ .hero{grid-template-columns:1fr;} }
+    @media (max-width:900px){
+      .hero{grid-template-columns:1fr;}
+    }
+
     .panel{
       background: rgba(18,26,51,.72);
       border:1px solid var(--border);
@@ -39,43 +66,79 @@
       box-shadow: 0 20px 60px rgba(0,0,0,.35);
       backdrop-filter: blur(10px);
     }
-    h1{margin:0 0 10px; font-size:42px; line-height:1.1;}
+
+    h1{margin:0 0 10px; font-size:42px;}
     .sub{margin:0 0 18px; color:var(--muted); font-size:16px; line-height:1.6;}
+
     .ctaRow{display:flex; gap:12px; flex-wrap:wrap; margin-top:18px;}
+
     .btn{
-      display:inline-flex; align-items:center; justify-content:center;
-      padding:12px 16px; border-radius:12px;
-      font-weight:800; text-decoration:none;
+      padding:12px 16px;
+      border-radius:12px;
+      font-weight:800;
+      text-decoration:none;
       border:1px solid var(--border);
-      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
     }
+
     .primary{background:var(--accent); color:white; border-color:transparent;}
     .primary:hover{filter:brightness(1.05)}
+
     .ghost{background:transparent; color:var(--text);}
     .ghost:hover{background:rgba(255,255,255,.06)}
+
     .grid{
-      display:grid; grid-template-columns: repeat(3, 1fr);
-      gap:14px; margin-top:18px;
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:14px;
+      margin-top:18px;
     }
-    @media (max-width:900px){ .grid{grid-template-columns:1fr;} }
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr;}
+    }
+
     .card{
       background: rgba(255,255,255,.04);
       border:1px solid var(--border);
       border-radius:14px;
       padding:14px;
     }
+
     .card h3{margin:0 0 6px; font-size:16px;}
-    .card p{margin:0; color:var(--muted); font-size:14px; line-height:1.5;}
+    .card p{margin:0; color:var(--muted); font-size:14px;}
+
     .side h2{margin:0 0 10px; font-size:18px;}
-    .list{margin:0; padding-left:18px; color:var(--muted); line-height:1.7;}
-    .footer{margin-top:30px; color:rgba(255,255,255,.65); font-size:13px;}
+    .list{padding-left:18px; color:var(--muted); line-height:1.7;}
+
+    .footer{margin-top:30px; font-size:13px; color:rgba(255,255,255,.65);}
     .tiny{font-size:12px; color:rgba(255,255,255,.55); margin-top:10px;}
+
     .tag{
-      display:inline-block; padding:6px 10px; border-radius:999px;
-      background:rgba(30,136,229,.18); border:1px solid rgba(30,136,229,.25);
-      color:#dbe9ff; font-weight:700; font-size:12px;
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      background:rgba(29,161,242,.18);
+      border:1px solid rgba(29,161,242,.25);
+      font-weight:700;
+      font-size:12px;
       margin-bottom:12px;
     }
+
+    /* Logo animation */
+    @keyframes barPulse {
+      0% { transform: scaleY(1); }
+      50% { transform: scaleY(1.15); }
+      100% { transform: scaleY(1); }
+    }
+
+    .logo-bar{
+      transform-origin: bottom;
+      animation: barPulse 2.4s ease-in-out infinite;
+    }
+    .logo-bar.b2{animation-delay:.2s;}
+    .logo-bar.b3{animation-delay:.4s;}
   </style>
 </head>
 
@@ -84,20 +147,16 @@
 
     <!-- Logo + Title -->
     <div style="display:flex; align-items:center; gap:14px; margin:8px 0 8px;">
-
-      <!-- Inline SVG Logo -->
-      <svg width="50" height="50" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Rental Deal Analyzer Logo">
-        <!-- House -->
+      <svg width="50" height="50" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
         <path d="M8 30L32 10L56 30V54H38V40H26V54H8V30Z"
-              stroke="#EAF0FF" stroke-width="3" fill="rgba(30,136,229,0.25)"/>
-        <!-- Chart bars -->
-        <rect x="22" y="34" width="5" height="10" fill="#2E7D32"/>
-        <rect x="30" y="30" width="5" height="14" fill="#2E7D32"/>
-        <rect x="38" y="26" width="5" height="18" fill="#2E7D32"/>
+              stroke="#EAF0FF" stroke-width="3"
+              fill="rgba(29,161,242,0.18)"/>
+        <rect class="logo-bar b1" x="22" y="34" width="5" height="10" fill="#1DA1F2"/>
+        <rect class="logo-bar b2" x="30" y="30" width="5" height="14" fill="#1DA1F2"/>
+        <rect class="logo-bar b3" x="38" y="26" width="5" height="18" fill="#1DA1F2"/>
       </svg>
 
-      <!-- Title -->
-      <span style="font-size:50px; font-weight:800; letter-spacing:0.3px;">
+      <span style="font-size:50px; font-weight:800;">
         Rental Deal Analyzer
       </span>
     </div>
@@ -107,12 +166,12 @@
         <div class="tag">Free • Fast • Beginner-friendly</div>
         <h1>Know if a rental deal works — in seconds.</h1>
         <p class="sub">
-          Analyze rental properties with a simple calculator that shows cash flow, cap rate, cash-on-cash return,
-          equity, and a deal score — all in one place.
+          Analyze rental properties with a simple calculator that shows cash flow, cap rate,
+          cash-on-cash return, equity, and a deal score.
         </p>
 
         <div class="ctaRow">
-          <a class="btn primary" href="https://rentdealanalyzer.streamlit.app/" target="_blank" rel="noopener">
+          <a class="btn primary" href="https://rentdealanalyzer.streamlit.app/" target="_blank">
             Open Free Calculator
           </a>
           <a class="btn primary" href="assets/RentalDealChecklist.xlsx" download>
@@ -124,15 +183,15 @@
         <div id="features" class="grid">
           <div class="card">
             <h3>Instant Deal Results</h3>
-            <p>Cash flow, NOI, cap rate, cash-on-cash return, equity %, deal score.</p>
+            <p>Cash flow, NOI, cap rate, CoC return, equity %, deal score.</p>
           </div>
           <div class="card">
             <h3>Beginner-friendly</h3>
-            <p>Simple inputs with clear metrics. Great for first-time investors.</p>
+            <p>Simple inputs with clear metrics.</p>
           </div>
           <div class="card">
             <h3>Export & Share</h3>
-            <p>Download your results to Excel/PDF from the calculator.</p>
+            <p>Download results to Excel or PDF.</p>
           </div>
         </div>
       </div>
@@ -140,19 +199,18 @@
       <div class="panel side">
         <h2>What you can calculate</h2>
         <ul class="list">
-          <li>Cash flow (monthly/annual)</li>
-          <li>Net operating income (NOI)</li>
+          <li>Cash flow</li>
+          <li>NOI</li>
           <li>Cap rate</li>
           <li>Cash-on-cash return</li>
-          <li>Equity % based on ARV</li>
-          <li>Deal score (0–100)</li>
+          <li>Equity %</li>
+          <li>Deal score</li>
         </ul>
 
-        <div style="height:14px"></div>
-        <h2 id="faq">FAQ</h2>
-        <p class="sub"><strong>Is it free?</strong><br/>Yes — the calculator is free to use.</p>
-        <p class="sub"><strong>Do you store my data?</strong><br/>No. Calculations run in real-time and reset on refresh.</p>
-        <p class="sub"><strong>Where is the tool?</strong><br/>Click “Open Free Calculator” to launch the app.</p>
+        <h2 style="margin-top:18px;">FAQ</h2>
+        <p class="sub"><strong>Is it free?</strong><br>Yes.</p>
+        <p class="sub"><strong>Do you store data?</strong><br>No.</p>
+        <p class="sub"><strong>Where is the tool?</strong><br>Click “Open Free Calculator”.</p>
 
         <div class="tiny">
           Contact: <a style="color:#dbe9ff" href="mailto:email@rentaldealanalyzer.com">email@rentaldealanalyzer.com</a>
@@ -161,10 +219,8 @@
     </div>
 
     <div class="footer">
-      © <span id="y"></span> RentalDealAnalyzer.com • For educational purposes only.
-      <div class="tiny">
-        This tool is not financial, legal, tax, or investment advice. All outputs are estimates, and use of this tool is at your own risk.
-      </div>
+      © <span id="y"></span> RentalDealAnalyzer.com
+      <div class="tiny">Educational purposes only. No financial advice.</div>
     </div>
 
   </div>
