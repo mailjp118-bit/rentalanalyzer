@@ -7,6 +7,17 @@
   <title>Rental Deal Analyzer | Free Rental Property Calculator</title>
   <meta name="description" content="Free rental property deal analyzer. Calculate cash flow, cap rate, cash-on-cash return, equity, and deal score instantly." />
 
+  <!-- Favicon / App Icon -->
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
+      <rect width='64' height='64' rx='14' fill='%230b1020'/>
+      <path d='M8 30L32 10L56 30V54H38V40H26V54H8V30Z' fill='%231DA1F2'/>
+      <rect x='22' y='34' width='5' height='10' fill='white'/>
+      <rect x='30' y='30' width='5' height='14' fill='white'/>
+      <rect x='38' y='26' width='5' height='18' fill='white'/>
+    </svg>">
+
   <style>
     :root{
       --bg:#0b1020;
@@ -65,9 +76,7 @@
     }
 
     .primary{background:var(--accent); color:white; border-color:transparent;}
-    .primary:hover{filter:brightness(1.05)}
     .ghost{background:transparent; color:var(--text);}
-    .ghost:hover{background:rgba(255,255,255,.06)}
 
     .grid{
       display:grid;
@@ -91,17 +100,6 @@
 
     .footer{margin-top:30px; font-size:13px; color:rgba(255,255,255,.65);}
     .tiny{font-size:12px; color:rgba(255,255,255,.55); margin-top:10px;}
-
-    .tag{
-      display:inline-block;
-      padding:6px 10px;
-      border-radius:999px;
-      background:rgba(29,161,242,.18);
-      border:1px solid rgba(29,161,242,.25);
-      font-weight:700;
-      font-size:12px;
-      margin-bottom:12px;
-    }
   </style>
 </head>
 
@@ -111,15 +109,18 @@
     <!-- TOP NAVIGATION -->
     <div style="display:flex; justify-content:flex-end; gap:14px; margin-bottom:16px;">
       <a class="btn ghost" href="/">Home</a>
-      <a class="btn ghost" href="#how-the-tool-works">How It Works</a>
+      <a class="btn ghost" href="#how-it-works">How It Works</a>
       <a class="btn ghost" href="#faq">FAQs</a>
       <a class="btn ghost" href="mailto:email@rentaldealanalyzer.com">Contact Us</a>
     </div>
 
-    <!-- HERO -->
+    <!-- Logo + Title -->
+    <div style="display:flex; align-items:center; gap:14px; margin:8px 0 8px;">
+      <span style="font-size:50px; font-weight:800;">Rental Deal Analyzer</span>
+    </div>
+
     <div class="hero">
       <div class="panel">
-        <div class="tag">Free • Fast • Beginner-friendly</div>
         <h1>Know if a rental deal works — in seconds.</h1>
         <p class="sub">
           Analyze rental properties with a simple calculator that shows cash flow, cap rate,
@@ -134,11 +135,11 @@
             Download RentalDealChecklist
           </a>
         </div>
-      </div>
-            <div id="features" class="grid">
+
+        <div class="grid">
           <div class="card">
             <h3>Instant Deal Results</h3>
-            <p>Cash flow, NOI, cap rate, CoC return, equity %, deal score.</p>
+            <p>Cash flow, NOI, cap rate, equity %, deal score.</p>
           </div>
           <div class="card">
             <h3>Beginner-friendly</h3>
@@ -165,36 +166,26 @@
         <h2 id="faq" style="margin-top:18px;">FAQ</h2>
         <p class="sub"><strong>Is it free?</strong><br>Yes.</p>
         <p class="sub"><strong>Do you store data?</strong><br>No.</p>
-        <p class="sub"><strong>Where is the tool?</strong><br>Click “Open Free Calculator”.</p>
-
-        <div class="tiny">
-          Contact: <a style="color:#dbe9ff" href="mailto:email@rentaldealanalyzer.com">email@rentaldealanalyzer.com</a>
-        </div>
       </div>
     </div>
 
-    <!-- HOW THE TOOL WORKS SECTION (ADDED) -->
-    <div id="how-the-tool-works" class="panel" style="margin-top:32px;">
+    <!-- HOW IT WORKS SECTION (ONLY ADDITION) -->
+    <div id="how-it-works" class="panel" style="margin-top:32px;">
       <h2>How The Tool Works</h2>
-      <p class="sub">
-        Rental Deal Analyzer helps real estate investors quickly evaluate rental properties
-        before making a purchase decision.
-      </p>
-
       <ul class="list">
-        <li><strong>Open the Calculator:</strong> Click “Open Free Calculator” to launch the tool.</li>
-        <li><strong>Enter Deal Inputs:</strong> Fill in purchase price, rent, expenses, financing, and assumptions.</li>
-        <li><strong>Analyze the Deal:</strong> Click “Analyze Deal” to instantly see deal results.</li>
-        <li><strong>Review Results:</strong> View Deal Results, Expense Breakdown, and Cash Required at Closing.</li>
-        <li><strong>Switch View Mode:</strong> Toggle between Monthly and Annual analysis.</li>
-        <li><strong>Download & Share:</strong> Export results as Excel or PDF for partners, lenders, or record keeping.</li>
+        <li>🟦 <strong>Open the Calculator:</strong> Click <em>Open Free Calculator</em>.</li>
+        <li>✍️ <strong>Fill Deal Inputs:</strong> Enter price, rent, expenses, loan details.</li>
+        <li>⚙️ <strong>Analyze Deal:</strong> Instantly calculate performance.</li>
+        <li>📊 <strong>View Results:</strong> Deal results, expenses, cash needed.</li>
+        <li>🔄 <strong>Switch View:</strong> Annual or Monthly analysis.</li>
+        <li>📥 <strong>Download & Share:</strong> Export Excel or PDF.</li>
       </ul>
     </div>
 
     <div class="footer">
       © <span id="y"></span> RentalDealAnalyzer.com
       <div class="tiny">
-        This tool is for educational purposes only and does not constitute financial, investment, legal, tax, or real estate advice.
+        Educational purposes only. Not financial or investment advice.
       </div>
     </div>
 
