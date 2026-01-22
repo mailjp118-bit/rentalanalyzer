@@ -5,7 +5,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import streamlit.components.v1 as components
 
-# ================= PAGE CONFIG (MUST BE FIRST STREAMLIT CALL) =================
+# ================= PAGE CONFIG (MUST BE FIRST STREAMLIT CALL) ================= Deal inputs in this tool starts with 0.00 be default. Can it be changed to 0. No other change. 
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
 #st.image("assets/logo2.png", use_container_width=True)
 
@@ -46,8 +46,6 @@ with top_left:
 Get **cash flow, cap rate, cash-on-cash return, deal score and much more** instantly.
 """)
 
-
-
 with top_middle:
     breakdown_view = st.selectbox(
         "📊 View Mode",
@@ -80,28 +78,29 @@ col1, spacer1, col2, spacer2, col3 = st.columns([1.2, 0.15, 1, 0.15, 1])
 with col1:
     st.header("🔢 Deal Inputs")
 
-    purchase_price = st.number_input("Purchase Price ($)", min_value=0.0, step=1000.0)
-    rehab_cost = st.number_input("Rehab Cost ($)", min_value=0.0, step=1000.0)
-    arv = st.number_input("After Repair Value (ARV) ($)", min_value=0.0, step=1000.0)
+    purchase_price = st.number_input("Purchase Price ($)", min_value=0.0, step=1000.0, format="%.0f")
+    rehab_cost = st.number_input("Rehab Cost ($)", min_value=0.0, step=1000.0, format="%.0f")
+    arv = st.number_input("After Repair Value (ARV) ($)", min_value=0.0, step=1000.0, format="%.0f")
 
-    monthly_rent = st.number_input("Monthly Rent ($)", min_value=0.0, step=100.0)
+    monthly_rent = st.number_input("Monthly Rent ($)", min_value=0.0, step=100.0, format="%.0f")
 
-    property_tax = st.number_input("Annual Property Tax ($)", min_value=0.0)
-    insurance = st.number_input("Annual Insurance ($)", min_value=0.0)
-    maintenance = st.number_input("Annual Maintenance ($)", min_value=0.0)
+    property_tax = st.number_input("Annual Property Tax ($)", min_value=0.0, format="%.0f")
+    insurance = st.number_input("Annual Insurance ($)", min_value=0.0, format="%.0f")
+    maintenance = st.number_input("Annual Maintenance ($)", min_value=0.0, format="%.0f")
 
-    vacancy_rate = st.number_input("Vacancy Rate (%)", 0.0, 100.0) / 100
-    management_fee = st.number_input("Management Fee (%)", 0.0, 100.0) / 100
+    vacancy_rate = st.number_input("Vacancy Rate (%)", 0.0, 100.0, format="%.0f") / 100
+    management_fee = st.number_input("Management Fee (%)", 0.0, 100.0, format="%.0f") / 100
 
-    down_payment_pct = st.number_input("Down Payment (%)", 0.0, 100.0) / 100
-    interest_rate = st.number_input("Interest Rate (%)", 0.0, 15.0) / 100
-    loan_term = st.number_input("Loan Term (Years)", 1, 40)
+    down_payment_pct = st.number_input("Down Payment (%)", 0.0, 100.0, format="%.0f") / 100
+    interest_rate = st.number_input("Interest Rate (%)", 0.0, 15.0, format="%.0f") / 100
+    loan_term = st.number_input("Loan Term (Years)", 1, 40, format="%.0f")
 
     closing_cost_pct = st.number_input(
         "Estimated Closing Costs (% of Purchase Price)",
         min_value=0.0,
         max_value=10.0,
-        value=3.0
+        value=3.0,
+        format="%.0f"
     ) / 100
 
     analyze = st.button("📊 Analyze Deal")
