@@ -5,7 +5,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import streamlit.components.v1 as components
 
-# ================= PAGE CONFIG (MUST BE FIRST STREAMLIT CALL) ================= Deal inputs in this tool starts with 0.00 be default. Can it be changed to 0. No other change. 
+# ================= PAGE CONFIG (MUST BE FIRST STREAMLIT CALL) ================= Deal inputs in this tool starts with 0.00 be default. Can it be changed to 0. No other change.
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
 #st.image("assets/logo2.png", use_container_width=True)
 
@@ -24,23 +24,28 @@ components.html(
     height=0,
 )
 
-# ================= PAGE CONFIG =================
-#st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
-
 # ================= TOP BAR =================
 top_left, top_middle, top_right = st.columns([5, 2, 2])
 
 with top_left:
+    # ✅ Replaced title + logo to match your HTML exactly (SVG + big text)
     st.markdown(
         """
-        <h1 style="font-weight:700; margin-bottom:0;">
-            <span style="color:#E53935;">Rental</span>
-            <span style="color:#1E88E5;">Deal</span>
-            <span style="color:#2E7D32;">Analyzer</span>
-        </h1>
+        <div style="display:flex; align-items:center; gap:14px; margin:8px 0 8px;">
+          <svg width="48" height="48" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 30L32 10L56 30V54H38V40H26V54H8V30Z"
+                  fill="rgba(29,161,242,0.25)" stroke="#EAF0FF" stroke-width="2"/>
+            <rect x="22" y="34" width="5" height="10" fill="#1DA1F2"/>
+            <rect x="30" y="30" width="5" height="14" fill="#1DA1F2"/>
+            <rect x="38" y="26" width="5" height="18" fill="#1DA1F2"/>
+          </svg>
+
+          <span style="font-size:50px; font-weight:800;">Rental Deal Analyzer</span>
+        </div>
         """,
         unsafe_allow_html=True
     )
+
     st.markdown("""
 ### Know if a rental deal works — Fast & Free.  
 Get **cash flow, cap rate, cash-on-cash return, deal score and much more** instantly.
@@ -78,29 +83,28 @@ col1, spacer1, col2, spacer2, col3 = st.columns([1.2, 0.15, 1, 0.15, 1])
 with col1:
     st.header("🔢 Deal Inputs")
 
-    purchase_price = st.number_input("Purchase Price ($)", min_value=0.0, step=1000.0, format="%.0f")
-    rehab_cost = st.number_input("Rehab Cost ($)", min_value=0.0, step=1000.0, format="%.0f")
-    arv = st.number_input("After Repair Value (ARV) ($)", min_value=0.0, step=1000.0, format="%.0f")
+    purchase_price = st.number_input("Purchase Price ($)", min_value=0.0, step=1000.0)
+    rehab_cost = st.number_input("Rehab Cost ($)", min_value=0.0, step=1000.0)
+    arv = st.number_input("After Repair Value (ARV) ($)", min_value=0.0, step=1000.0)
 
-    monthly_rent = st.number_input("Monthly Rent ($)", min_value=0.0, step=100.0, format="%.0f")
+    monthly_rent = st.number_input("Monthly Rent ($)", min_value=0.0, step=100.0)
 
-    property_tax = st.number_input("Annual Property Tax ($)", min_value=0.0, format="%.0f")
-    insurance = st.number_input("Annual Insurance ($)", min_value=0.0, format="%.0f")
-    maintenance = st.number_input("Annual Maintenance ($)", min_value=0.0, format="%.0f")
+    property_tax = st.number_input("Annual Property Tax ($)", min_value=0.0)
+    insurance = st.number_input("Annual Insurance ($)", min_value=0.0)
+    maintenance = st.number_input("Annual Maintenance ($)", min_value=0.0)
 
-    vacancy_rate = st.number_input("Vacancy Rate (%)", 0.0, 100.0, format="%.0f") / 100
-    management_fee = st.number_input("Management Fee (%)", 0.0, 100.0, format="%.0f") / 100
+    vacancy_rate = st.number_input("Vacancy Rate (%)", 0.0, 100.0) / 100
+    management_fee = st.number_input("Management Fee (%)", 0.0, 100.0) / 100
 
-    down_payment_pct = st.number_input("Down Payment (%)", 0.0, 100.0, format="%.0f") / 100
-    interest_rate = st.number_input("Interest Rate (%)", 0.0, 15.0, format="%.0f") / 100
-    loan_term = st.number_input("Loan Term (Years)", 1, 40, format="%.0f")
+    down_payment_pct = st.number_input("Down Payment (%)", 0.0, 100.0) / 100
+    interest_rate = st.number_input("Interest Rate (%)", 0.0, 15.0) / 100
+    loan_term = st.number_input("Loan Term (Years)", 1, 40)
 
     closing_cost_pct = st.number_input(
         "Estimated Closing Costs (% of Purchase Price)",
         min_value=0.0,
         max_value=10.0,
-        value=3.0,
-        format="%.0f"
+        value=3.0
     ) / 100
 
     analyze = st.button("📊 Analyze Deal")
