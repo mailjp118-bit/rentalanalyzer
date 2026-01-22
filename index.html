@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>Rental Deal Analyzer | Free Rental Property Calculator</title>
-  <meta name="description" content="Free rental property deal analyzer. Calculate cash flow, cap rate, cash-on-cash return, equity, and deal score instantly." />
+  <meta name="description"
+    content="Rental Deal Analyzer is a free rental property calculator. Analyze cash flow, cap rate, cash-on-cash return, equity, and deal score in seconds." />
 
   <style>
     :root{
@@ -49,9 +50,8 @@
     }
 
     h1{margin:0 0 10px; font-size:42px;}
+    h2{margin-top:32px;}
     .sub{margin:0 0 18px; color:var(--muted); font-size:16px; line-height:1.6;}
-
-    .ctaRow{display:flex; gap:12px; flex-wrap:wrap; margin-top:18px;}
 
     .btn{
       padding:12px 16px;
@@ -66,159 +66,136 @@
     }
 
     .primary{background:var(--accent); color:white; border-color:transparent;}
-    .primary:hover{filter:brightness(1.05)}
-
     .ghost{background:transparent; color:var(--text);}
     .ghost:hover{background:rgba(255,255,255,.06)}
 
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap:14px;
-      margin-top:18px;
-    }
-    @media (max-width:900px){
-      .grid{grid-template-columns:1fr;}
-    }
+    .ctaRow{display:flex; gap:12px; flex-wrap:wrap; margin-top:18px;}
 
-    .card{
-      background: rgba(255,255,255,.04);
-      border:1px solid var(--border);
-      border-radius:14px;
-      padding:14px;
-    }
-
-    .card h3{margin:0 0 6px; font-size:16px;}
-    .card p{margin:0; color:var(--muted); font-size:14px;}
-
-    .side h2{margin:0 0 10px; font-size:18px;}
-    .list{padding-left:18px; color:var(--muted); line-height:1.7;}
-
-    .footer{margin-top:30px; font-size:13px; color:rgba(255,255,255,.65);}
+    .footer{margin-top:40px; font-size:13px; color:rgba(255,255,255,.65);}
     .tiny{font-size:12px; color:rgba(255,255,255,.55); margin-top:10px;}
-
-    .tag{
-      display:inline-block;
-      padding:6px 10px;
-      border-radius:999px;
-      background:rgba(29,161,242,.18);
-      border:1px solid rgba(29,161,242,.25);
-      font-weight:700;
-      font-size:12px;
-      margin-bottom:12px;
-    }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
+<div class="wrap">
 
-    <!-- TOP NAVIGATION -->
-    <div style="display:flex; justify-content:flex-end; gap:14px; margin-bottom:8px;">
-      <a class="btn ghost" href="/">Home</a>
-
-      <!-- How It Works toggle -->
-      <a class="btn ghost" onclick="toggleHowItWorks()">How It Works</a>
-
-      <a class="btn ghost" href="#faq">FAQs</a>
-      <a class="btn ghost" href="mailto:email@rentaldealanalyzer.com">Contact Us</a>
-    </div>
-
-    <!-- HOW IT WORKS DROPDOWN -->
-    <div id="howItWorksContent" style="
-      display:none;
-      margin-bottom:16px;
-      padding:16px;
-      border-radius:12px;
-      background: rgba(18,26,51,.72);
-      border:1px solid rgba(255,255,255,.10);
-    ">
-      <strong>Download &amp; Share</strong>
-      <p class="sub" style="margin-top:8px;">
-        Download results as Excel or PDF to share with partners, lenders,
-        or for record keeping.
-      </p>
-    </div>
-
-    <!-- Logo + Title -->
-    <div style="display:flex; align-items:center; gap:14px; margin:8px 0 8px;">
-      <span style="font-size:50px; font-weight:800;">
-        Rental Deal Analyzer
-      </span>
-    </div>
-
-    <div class="hero">
-      <div class="panel">
-        <div class="tag">Free • Fast • Beginner-friendly</div>
-        <h1>Know if a rental deal works — in seconds.</h1>
-        <p class="sub">
-          Analyze rental properties with a simple calculator that shows cash flow, cap rate,
-          cash-on-cash return, equity, and a deal score.
-        </p>
-
-        <div class="ctaRow">
-          <a class="btn primary" href="https://rentdealanalyzer.streamlit.app/" target="_blank">
-            Open Free Calculator
-          </a>
-          <a class="btn primary" href="assets/RentalDealChecklist.xlsx" download>
-            Download RentalDealChecklist
-          </a>
-        </div>
-
-        <div class="grid">
-          <div class="card">
-            <h3>Instant Deal Results</h3>
-            <p>Cash flow, NOI, cap rate, CoC return, equity %, deal score.</p>
-          </div>
-          <div class="card">
-            <h3>Beginner-friendly</h3>
-            <p>Simple inputs with clear metrics.</p>
-          </div>
-          <div class="card">
-            <h3>Export & Share</h3>
-            <p>Download results to Excel or PDF.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel side">
-        <h2>What you can calculate</h2>
-        <ul class="list">
-          <li>Cash flow</li>
-          <li>NOI</li>
-          <li>Cap rate</li>
-          <li>Cash-on-cash return</li>
-          <li>Equity %</li>
-          <li>Deal score</li>
-        </ul>
-
-        <h2 id="faq" style="margin-top:18px;">FAQ</h2>
-        <p class="sub"><strong>Is it free?</strong><br>Yes.</p>
-        <p class="sub"><strong>Do you store data?</strong><br>No.</p>
-        <p class="sub"><strong>Where is the tool?</strong><br>Click “Open Free Calculator”.</p>
-
-        <div class="tiny">
-          Contact:
-          <a style="color:#dbe9ff" href="mailto:email@rentaldealanalyzer.com">
-            email@rentaldealanalyzer.com
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <div class="footer">
-      © <span id="y"></span> RentalDealAnalyzer.com
-    </div>
-
+  <!-- TOP NAV -->
+  <div style="display:flex; justify-content:flex-end; gap:14px; margin-bottom:8px;">
+    <a class="btn ghost" href="/">Home</a>
+    <a class="btn ghost" id="howItWorksBtn">How It Works</a>
+    <a class="btn ghost" href="#faq">FAQs</a>
+    <a class="btn ghost" href="mailto:email@rentaldealanalyzer.com">Contact Us</a>
   </div>
 
-  <script>
-    document.getElementById("y").textContent = new Date().getFullYear();
+  <!-- HOW IT WORKS DROPDOWN -->
+  <div id="howItWorksContent" style="
+    display:none;
+    margin-bottom:18px;
+    padding:18px;
+    border-radius:12px;
+    background: rgba(18,26,51,.72);
+    border:1px solid rgba(255,255,255,.10);
+  ">
+    <h2>How Rental Deal Analyzer Works</h2>
 
-    function toggleHowItWorks(){
-      const el = document.getElementById("howItWorksContent");
-      el.style.display = el.style.display === "none" ? "block" : "none";
+    <p class="sub">
+      Rental Deal Analyzer is a free online rental property calculator designed for
+      beginner and experienced real estate investors to quickly evaluate rental deals.
+    </p>
+
+    <ol style="color:#b9c3ff; line-height:1.7;">
+      <li>🚀 <strong>Open the Calculator</strong><br>
+        Click <em>Open Free Calculator</em> to launch the Streamlit-based rental deal analyzer.
+      </li>
+
+      <li>🧮 <strong>Enter Deal Inputs</strong><br>
+        Provide purchase price, rehab cost, monthly rent, operating expenses,
+        vacancy rate, management fee, loan terms, and down payment.
+      </li>
+
+      <li>📊 <strong>Analyze the Deal</strong><br>
+        Click <em>Analyze Deal</em> to instantly calculate:
+        <ul>
+          <li>Cash Flow</li>
+          <li>Net Operating Income (NOI)</li>
+          <li>Cap Rate</li>
+          <li>Cash-on-Cash Return</li>
+          <li>Equity Percentage</li>
+          <li>Rental Deal Score (0–100)</li>
+        </ul>
+      </li>
+
+      <li>🔄 <strong>Switch View Mode</strong><br>
+        Toggle between <strong>Annual</strong> and <strong>Monthly</strong> views
+        to understand both short-term and long-term performance.
+      </li>
+
+      <li>⬇️ <strong>Download &amp; Share</strong><br>
+        Download your rental analysis as <strong>Excel</strong> or <strong>PDF</strong>
+        to share with partners, lenders, or for record keeping.
+      </li>
+    </ol>
+
+    <p class="sub">
+      This tool helps you quickly decide whether a rental property is a
+      strong deal, marginal deal, or weak deal before you invest.
+    </p>
+  </div>
+
+  <!-- HERO -->
+  <div class="panel">
+    <h1>Rental Deal Analyzer</h1>
+    <p class="sub">
+      A free rental property calculator to evaluate cash flow, cap rate,
+      cash-on-cash return, equity, and deal score — in seconds.
+    </p>
+
+    <div class="ctaRow">
+      <a class="btn primary" href="https://rentdealanalyzer.streamlit.app/" target="_blank">
+        Open Free Calculator
+      </a>
+      <a class="btn primary" href="assets/RentalDealChecklist.xlsx" download>
+        Download RentalDealChecklist
+      </a>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div id="faq" class="panel" style="margin-top:22px;">
+    <h2>Frequently Asked Questions</h2>
+
+    <p class="sub"><strong>Is Rental Deal Analyzer free?</strong><br>Yes, it is 100% free.</p>
+    <p class="sub"><strong>Do you store my data?</strong><br>No. All calculations run in real time and reset on refresh.</p>
+    <p class="sub"><strong>Who is this tool for?</strong><br>Beginner and experienced rental property investors.</p>
+  </div>
+
+  <div class="footer">
+    © <span id="y"></span> RentalDealAnalyzer.com
+    <div class="tiny">
+      This tool is for educational purposes only and does not constitute financial,
+      investment, legal, tax, or real estate advice.
+    </div>
+  </div>
+
+</div>
+
+<script>
+  document.getElementById("y").textContent = new Date().getFullYear();
+
+  const btn = document.getElementById("howItWorksBtn");
+  const dropdown = document.getElementById("howItWorksContent");
+
+  btn.addEventListener("click", () => {
+    dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+  });
+
+  // Auto-close when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
+      dropdown.style.display = "none";
     }
-  </script>
+  });
+</script>
+
 </body>
 </html>
