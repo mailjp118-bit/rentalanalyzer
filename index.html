@@ -7,24 +7,6 @@
   <title>Rental Deal Analyzer | Free Rental Property Calculator</title>
   <meta name="description" content="Free rental property deal analyzer. Calculate cash flow, cap rate, cash-on-cash return, equity, and deal score instantly." />
 
-  <!-- Favicon / App Icon -->
-  <link rel="icon" type="image/svg+xml"
-    href="data:image/svg+xml,
-    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
-      <rect width='64' height='64' rx='14' fill='%230b1020'/>
-      <path d='M8 30L32 10L56 30V54H38V40H26V54H8V30Z' fill='%231DA1F2'/>
-      <rect x='22' y='34' width='5' height='10' fill='white'/>
-      <rect x='30' y='30' width='5' height='14' fill='white'/>
-      <rect x='38' y='26' width='5' height='18' fill='white'/>
-    </svg>">
-
-  <link rel="apple-touch-icon"
-    href="data:image/svg+xml,
-    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
-      <rect width='64' height='64' rx='14' fill='%230b1020'/>
-      <path d='M8 30L32 10L56 30V54H38V40H26V54H8V30Z' fill='%231DA1F2'/>
-    </svg>">
-
   <style>
     :root{
       --bg:#0b1020;
@@ -32,7 +14,6 @@
       --text:#eaf0ff;
       --muted:#b9c3ff;
       --accent:#1DA1F2;
-      --accent2:#2E7D32;
       --border:rgba(255,255,255,.10);
     }
 
@@ -81,6 +62,7 @@
       display:inline-flex;
       align-items:center;
       justify-content:center;
+      cursor:pointer;
     }
 
     .primary{background:var(--accent); color:white; border-color:transparent;}
@@ -125,44 +107,41 @@
       font-size:12px;
       margin-bottom:12px;
     }
-
-    @keyframes barPulse {
-      0% { transform: scaleY(1); }
-      50% { transform: scaleY(1.15); }
-      100% { transform: scaleY(1); }
-    }
-
-    .logo-bar{
-      transform-origin: bottom;
-      animation: barPulse 2.4s ease-in-out infinite;
-    }
-    .logo-bar.b2{animation-delay:.2s;}
-    .logo-bar.b3{animation-delay:.4s;}
   </style>
 </head>
 
 <body>
   <div class="wrap">
 
-    <!-- TOP NAVIGATION (added) -->
-    <div style="display:flex; justify-content:flex-end; gap:14px; margin-bottom:16px;">
+    <!-- TOP NAVIGATION -->
+    <div style="display:flex; justify-content:flex-end; gap:14px; margin-bottom:8px;">
       <a class="btn ghost" href="/">Home</a>
-      <a class="btn ghost" href="#features">How It Works</a>
+
+      <!-- How It Works toggle -->
+      <a class="btn ghost" onclick="toggleHowItWorks()">How It Works</a>
+
       <a class="btn ghost" href="#faq">FAQs</a>
       <a class="btn ghost" href="mailto:email@rentaldealanalyzer.com">Contact Us</a>
     </div>
 
+    <!-- HOW IT WORKS DROPDOWN -->
+    <div id="howItWorksContent" style="
+      display:none;
+      margin-bottom:16px;
+      padding:16px;
+      border-radius:12px;
+      background: rgba(18,26,51,.72);
+      border:1px solid rgba(255,255,255,.10);
+    ">
+      <strong>Download &amp; Share</strong>
+      <p class="sub" style="margin-top:8px;">
+        Download results as Excel or PDF to share with partners, lenders,
+        or for record keeping.
+      </p>
+    </div>
+
     <!-- Logo + Title -->
     <div style="display:flex; align-items:center; gap:14px; margin:8px 0 8px;">
-      <svg width="50" height="50" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8 30L32 10L56 30V54H38V40H26V54H8V30Z"
-              stroke="#EAF0FF" stroke-width="3"
-              fill="rgba(29,161,242,0.18)"/>
-        <rect class="logo-bar b1" x="22" y="34" width="5" height="10" fill="#1DA1F2"/>
-        <rect class="logo-bar b2" x="30" y="30" width="5" height="14" fill="#1DA1F2"/>
-        <rect class="logo-bar b3" x="38" y="26" width="5" height="18" fill="#1DA1F2"/>
-      </svg>
-
       <span style="font-size:50px; font-weight:800;">
         Rental Deal Analyzer
       </span>
@@ -184,10 +163,9 @@
           <a class="btn primary" href="assets/RentalDealChecklist.xlsx" download>
             Download RentalDealChecklist
           </a>
-          <a class="btn ghost" href="#features">See features</a>
         </div>
 
-        <div id="features" class="grid">
+        <div class="grid">
           <div class="card">
             <h3>Instant Deal Results</h3>
             <p>Cash flow, NOI, cap rate, CoC return, equity %, deal score.</p>
@@ -220,22 +198,27 @@
         <p class="sub"><strong>Where is the tool?</strong><br>Click “Open Free Calculator”.</p>
 
         <div class="tiny">
-          Contact: <a style="color:#dbe9ff" href="mailto:email@rentaldealanalyzer.com">email@rentaldealanalyzer.com</a>
+          Contact:
+          <a style="color:#dbe9ff" href="mailto:email@rentaldealanalyzer.com">
+            email@rentaldealanalyzer.com
+          </a>
         </div>
       </div>
     </div>
 
     <div class="footer">
       © <span id="y"></span> RentalDealAnalyzer.com
-      <div class="tiny">
-        This tool is for educational purposes only and does not constitute financial, investment, legal, tax, or real estate advice.
-      </div>
     </div>
 
   </div>
 
   <script>
     document.getElementById("y").textContent = new Date().getFullYear();
+
+    function toggleHowItWorks(){
+      const el = document.getElementById("howItWorksContent");
+      el.style.display = el.style.display === "none" ? "block" : "none";
+    }
   </script>
 </body>
 </html>
