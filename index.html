@@ -17,97 +17,71 @@
       <rect x='30' y='30' width='5' height='14' fill='white'/>
       <rect x='38' y='26' width='5' height='18' fill='white'/>
     </svg>">
-
-  <!-- ================= SEO SCHEMA: RENTAL DEAL CALCULATOR ================= -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "Rental Deal Analyzer",
-    "applicationCategory": "FinanceApplication",
-    "operatingSystem": "Web",
-    "url": "https://www.rentaldealanalyzer.com/",
-    "description": "Free rental property calculator to analyze cash flow, cap rate, cash-on-cash return, equity percentage, operating expenses, cash required at closing, and rental deal score.",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
-    "creator": {
-      "@type": "Organization",
-      "name": "Rental Deal Analyzer",
-      "url": "https://www.rentaldealanalyzer.com/"
-    },
-    "featureList": [
-      "Cash Flow Calculator",
-      "Net Operating Income (NOI)",
-      "Cap Rate Calculation",
-      "Cash-on-Cash Return",
-      "Equity Percentage",
-      "Operating Expense Breakdown",
-      "Cash Required at Closing",
-      "Rental Deal Score",
-      "Excel Export",
-      "PDF Export"
-    ],
-    "potentialAction": {
-      "@type": "UseAction",
-      "target": {
-        "@type": "EntryPoint",
-        "urlTemplate": "https://rentdealanalyzer.streamlit.app/",
-        "actionPlatform": [
-          "https://schema.org/DesktopWebPlatform",
-          "https://schema.org/MobileWebPlatform"
-        ]
-      },
-      "name": "Analyze Rental Property Deal"
-    }
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Rental Deal Analyzer",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "url": "https://www.rentaldealanalyzer.com/",
+  "description": "Free rental property calculator to analyze cash flow, cap rate, cash-on-cash return, equity percentage, operating expenses, cash required at closing, and rental deal score.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "featureList": [
+    "Cash Flow",
+    "NOI",
+    "Cap Rate",
+    "Cash-on-Cash Return",
+    "Equity Percentage",
+    "Expense Breakdown",
+    "Cash Required at Closing",
+    "Rental Deal Score",
+    "Excel Download",
+    "PDF Download"
+  ],
+  "potentialAction": {
+    "@type": "UseAction",
+    "target": "https://rentdealanalyzer.streamlit.app/"
   }
-  </script>
-
-  <!-- ================= SEO SCHEMA: FAQ BOOST ================= -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "Is the Rental Deal Analyzer free?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes. Rental Deal Analyzer is completely free to use for analyzing rental property investments."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What does the Rental Deal Analyzer calculate?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "It calculates cash flow, net operating income (NOI), cap rate, cash-on-cash return, equity percentage, operating expenses, cash required at closing, and a rental deal score."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Do you store my financial data?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "No. All calculations run in real time and no data is stored."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Can I download my rental analysis?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes. You can download your rental deal analysis as Excel or PDF."
-        }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is the Rental Deal Analyzer free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, the Rental Deal Analyzer is completely free to use."
       }
-    ]
-  }
-  </script>
+    },
+    {
+      "@type": "Question",
+      "name": "What does the Rental Deal Analyzer calculate?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It calculates cash flow, NOI, cap rate, cash-on-cash return, equity percentage, operating expenses, cash required at closing, and a rental deal score."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I download my results?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, you can download results as Excel or PDF."
+      }
+    }
+  ]
+}
+</script>
 
-  <!-- ================= EXISTING STYLES (UNCHANGED) ================= -->
   <style>
     :root{
       --bg:#0b1020;
@@ -117,7 +91,9 @@
       --accent:#1DA1F2;
       --border:rgba(255,255,255,.10);
     }
+
     *{box-sizing:border-box}
+
     body{
       margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -126,24 +102,180 @@
                   var(--bg);
       color: var(--text);
     }
+
     .wrap{max-width:1100px; margin:0 auto; padding:28px 18px 70px;}
-    .hero{display:grid; grid-template-columns:1.25fr .75fr; gap:22px;}
-    @media (max-width:900px){.hero{grid-template-columns:1fr;}}
-    .panel{background:rgba(18,26,51,.72); border:1px solid var(--border); border-radius:18px; padding:28px;}
+
+    .hero{
+      display:grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap:22px;
+    }
+    @media (max-width:900px){
+      .hero{grid-template-columns:1fr;}
+    }
+
+    .panel{
+      background: rgba(18,26,51,.72);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:28px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+      backdrop-filter: blur(10px);
+    }
+
     h1{margin:0 0 10px; font-size:42px;}
-    .sub{color:var(--muted);}
-    .btn{padding:12px 16px; border-radius:12px; font-weight:800; text-decoration:none;}
-    .primary{background:var(--accent); color:white;}
+    .sub{margin:0 0 18px; color:var(--muted); font-size:16px; line-height:1.6;}
+
+    .ctaRow{display:flex; gap:12px; flex-wrap:wrap; margin-top:18px;}
+
+    .btn{
+      padding:12px 16px;
+      border-radius:12px;
+      font-weight:800;
+      text-decoration:none;
+      border:1px solid var(--border);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .primary{background:var(--accent); color:white; border-color:transparent;}
     .ghost{background:transparent; color:var(--text);}
-    .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
-    .card{background:rgba(255,255,255,.04); border-radius:14px; padding:14px;}
-    .list{padding-left:18px; color:var(--muted);}
-    .footer{margin-top:30px; font-size:13px;}
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:14px;
+      margin-top:18px;
+    }
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr;}
+    }
+
+    .card{
+      background: rgba(255,255,255,.04);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px;
+    }
+
+    .side h2{margin:0 0 10px; font-size:18px;}
+    .list{padding-left:18px; color:var(--muted); line-height:1.7;}
+
+    .footer{margin-top:30px; font-size:13px; color:rgba(255,255,255,.65);}
+    .tiny{font-size:12px; color:rgba(255,255,255,.55); margin-top:10px;}
   </style>
 </head>
 
 <body>
-  <!-- BODY CONTENT UNCHANGED -->
-  <!-- (exactly as you provided) -->
+  <div class="wrap">
+
+    <!-- TOP NAVIGATION -->
+    <div style="display:flex; justify-content:flex-end; gap:14px; margin-bottom:16px;">
+      <a class="btn ghost" href="/">Home</a>
+      <a class="btn ghost" href="#how-it-works">How It Works</a>
+      <a class="btn ghost" href="#faq">FAQs</a>
+      <a class="btn ghost" href="mailto:email@rentaldealanalyzer.com">Contact Us</a>
+    </div>
+
+    <!-- Logo + Title (LOGO ADDED) -->
+    <div style="display:flex; align-items:center; gap:14px; margin:8px 0 8px;">
+      <svg width="48" height="48" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 30L32 10L56 30V54H38V40H26V54H8V30Z"
+              fill="rgba(29,161,242,0.25)" stroke="#EAF0FF" stroke-width="2"/>
+        <rect x="22" y="34" width="5" height="10" fill="#1DA1F2"/>
+        <rect x="30" y="30" width="5" height="14" fill="#1DA1F2"/>
+        <rect x="38" y="26" width="5" height="18" fill="#1DA1F2"/>
+      </svg>
+
+      <span style="font-size:50px; font-weight:800;">Rental Deal Analyzer</span>
+    </div>
+
+    <div class="hero">
+      <div class="panel">
+        <h1>Know if a rental deal works — in seconds.</h1>
+        <p class="sub">
+          Analyze rental properties with a simple calculator that shows cash flow, cap rate,
+          cash-on-cash return, equity, and a deal score.
+        </p>
+
+        <div class="ctaRow">
+          <a class="btn primary" href="https://rentdealanalyzer.streamlit.app/" target="_blank">
+            Open Free Calculator
+          </a>
+          <a class="btn primary" href="assets/RentalDealChecklist.xlsx" download>
+            Download RentalDealChecklist
+          </a>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h3>Instant Deal Results</h3>
+            <p>Cash flow, NOI, cap rate, equity %, deal score.</p>
+          </div>
+          <div class="card">
+            <h3>Beginner-friendly</h3>
+            <p>Simple inputs with clear metrics.</p>
+          </div>
+          <div class="card">
+            <h3>Export & Share</h3>
+            <p>Download results to Excel or PDF.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL (LIST EXPANDED ONLY) -->
+      <div class="panel side">
+        <h2>What you can calculate</h2>
+        <ul class="list">
+          <li>Monthly & Annual Cash Flow</li>
+          <li>Net Operating Income (NOI)</li>
+          <li>Cap Rate</li>
+          <li>Cash-on-Cash Return</li>
+          <li>Equity Percentage</li>
+          <li>After Repair Value (ARV)</li>
+          <li>Total Cash Invested</li>
+          <li>Operating Expenses Breakdown</li>
+          <li>Cash Required at Closing</li>
+          <li>Vacancy Impact</li>
+          <li>Property Management Costs</li>
+          <li>Rental Deal Score (0–100)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div id="how-it-works" class="panel" style="margin-top:32px;">
+      <h2>How The Tool Works</h2>
+      <ul class="list">
+        <li>🟦 <strong>Open the Calculator:</strong> Click <em>Open Free Calculator</em>.</li>
+        <li>✍️ <strong>Fill Deal Inputs:</strong> Enter price, rent, expenses, loan details.</li>
+        <li>⚙️ <strong>Analyze Deal:</strong> Instantly calculate performance.</li>
+        <li>📊 <strong>View Results:</strong> Deal results, expenses, cash needed.</li>
+        <li>🔄 <strong>Switch View:</strong> Annual or Monthly analysis.</li>
+        <li>📥 <strong>Download & Share:</strong> Export Excel or PDF.</li>
+      </ul>
+    </div>
+
+    <!-- FAQ SECTION -->
+    <div id="faq" class="panel" style="margin-top:32px;">
+      <h2>Frequently Asked Questions</h2>
+      <p class="sub"><strong>Is the Rental Deal Analyzer free?</strong><br>Yes.</p>
+      <p class="sub"><strong>Do you store my data?</strong><br>No.</p>
+      <p class="sub"><strong>Can I download results?</strong><br>Yes, Excel & PDF.</p>
+    </div>
+
+    <div class="footer">
+      © <span id="y"></span> RentalDealAnalyzer.com
+      <div class="tiny">
+        Educational purposes only. Not financial or investment advice.
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    document.getElementById("y").textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
