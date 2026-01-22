@@ -17,28 +17,6 @@
       <rect x='38' y='26' width='5' height='18' fill='white'/>
     </svg>">
 
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "Rental Deal Analyzer",
-    "applicationCategory": "FinanceApplication",
-    "operatingSystem": "Web",
-    "url": "https://www.rentaldealanalyzer.com/",
-    "description": "Free rental property calculator to analyze cash flow, cap rate, cash-on-cash return, equity percentage, operating expenses, cash required at closing, and rental deal score.",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
-    "featureList": ["Cash Flow","NOI","Cap Rate","Cash-on-Cash Return","Equity Percentage","Expense Breakdown","Cash Required at Closing","Rental Deal Score","Excel Download","PDF Download"],
-    "potentialAction": {
-      "@type": "UseAction",
-      "target": "https://rentdealanalyzer.streamlit.app/"
-    }
-  }
-  </script>
-
   <style>
     :root{
       --bg:#0b1020;
@@ -199,8 +177,8 @@
           <a class="btn primary" href="https://rentdealanalyzer.streamlit.app/" target="_blank">
             Open Free Calculator
           </a>
-          <a class="btn ghost" href="assets/RentalDealChecklist.xlsx" download>
-            Download Checklist (.xlsx)
+          <a class="btn primary" href="assets/RentalDealChecklist.xlsx" download>
+            Download Rental Deal Checklist
           </a>
         </div>
 
@@ -241,7 +219,7 @@
       <h2>How The Tool Works</h2>
       <ul class="list">
         <li>🟦 <strong>Open the Calculator:</strong> Click the primary action button.</li>
-        <li>✍️ <strong>Fill Deal Inputs:</strong> Enter purchase price, rent, and expenses.</li>
+        <li>✍ {**Fill Deal Inputs:** Enter purchase price, rent, and expenses.}</li>
         <li>⚙️ <strong>Analyze Deal:</strong> View instant performance metrics.</li>
         <li>📥 <strong>Download:</strong> Save your work as an Excel or PDF file.</li>
       </ul>
@@ -250,14 +228,14 @@
     <div id="faq" class="panel" style="margin-top:32px;">
       <h2>Frequently Asked Questions</h2>
       <p class="sub"><strong>Is the Rental Deal Analyzer free?</strong><br>Yes, it is 100% free for educational use.</p>
-      <p class="sub"><strong>Do you store my property data?</strong><br>No, all calculations happen in your session and are not saved on our servers.</p>
-      <p class="sub"><strong>Can I use this for commercial properties?</strong><br>It is optimized for 1-4 unit residential rentals but works for basic commercial estimates.</p>
+      <p class="sub"><strong>Do you store my property data?</strong><br>No, all calculations happen in your session.</p>
+    </p>
     </div>
 
     <div class="footer">
       © <span id="y"></span> RentalDealAnalyzer.com
       <div class="tiny">
-        Educational purposes only. This tool does not constitute financial, investment, legal, or real estate advice. All outputs are estimates. Use of this tool is at your own risk.
+        Educational purposes only. This tool does not constitute financial advice. All outputs are estimates.
       </div>
     </div>
 
