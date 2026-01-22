@@ -31,7 +31,7 @@
       --card:#121a33;
       --text:#eaf0ff;
       --muted:#b9c3ff;
-      --accent:#1DA1F2;     /* Streamlit blue */
+      --accent:#1DA1F2;
       --accent2:#2E7D32;
       --border:rgba(255,255,255,.10);
     }
@@ -126,7 +126,6 @@
       margin-bottom:12px;
     }
 
-    /* Logo animation */
     @keyframes barPulse {
       0% { transform: scaleY(1); }
       50% { transform: scaleY(1.15); }
@@ -144,6 +143,14 @@
 
 <body>
   <div class="wrap">
+
+    <!-- TOP NAVIGATION (added) -->
+    <div style="display:flex; justify-content:flex-end; gap:14px; margin-bottom:16px;">
+      <a class="btn ghost" href="/">Home</a>
+      <a class="btn ghost" href="#features">How It Works</a>
+      <a class="btn ghost" href="#faq">FAQs</a>
+      <a class="btn ghost" href="mailto:email@rentaldealanalyzer.com">Contact Us</a>
+    </div>
 
     <!-- Logo + Title -->
     <div style="display:flex; align-items:center; gap:14px; margin:8px 0 8px;">
@@ -207,7 +214,7 @@
           <li>Deal score</li>
         </ul>
 
-        <h2 style="margin-top:18px;">FAQ</h2>
+        <h2 id="faq" style="margin-top:18px;">FAQ</h2>
         <p class="sub"><strong>Is it free?</strong><br>Yes.</p>
         <p class="sub"><strong>Do you store data?</strong><br>No.</p>
         <p class="sub"><strong>Where is the tool?</strong><br>Click “Open Free Calculator”.</p>
@@ -220,7 +227,9 @@
 
     <div class="footer">
       © <span id="y"></span> RentalDealAnalyzer.com
-      <div class="tiny"> This tool is for educational purposes only and does not constitute financial, investment, legal, tax, or real estate advice. All outputs are estimates, and use of this tool is at your own risk.</div>
+      <div class="tiny">
+        This tool is for educational purposes only and does not constitute financial, investment, legal, tax, or real estate advice.
+      </div>
     </div>
 
   </div>
