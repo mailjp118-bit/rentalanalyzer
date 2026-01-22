@@ -83,28 +83,28 @@ col1, spacer1, col2, spacer2, col3 = st.columns([1.2, 0.15, 1, 0.15, 1])
 with col1:
     st.header("🔢 Deal Inputs")
 
-    purchase_price = st.number_input("Purchase Price ($)", min_value=0.0, step=1000.0)
-    rehab_cost = st.number_input("Rehab Cost ($)", min_value=0.0, step=1000.0)
-    arv = st.number_input("After Repair Value (ARV) ($)", min_value=0.0, step=1000.0)
+    purchase_price = st.number_input("Purchase Price ($)", min_value=0, step=1000, value=0)
+    rehab_cost = st.number_input("Rehab Cost ($)", min_value=0, step=1000, value=0)
+    arv = st.number_input("After Repair Value (ARV) ($)", min_value=0, step=1000, value=0)
 
-    monthly_rent = st.number_input("Monthly Rent ($)", min_value=0.0, step=100.0)
+    monthly_rent = st.number_input("Monthly Rent ($)", min_value=0, step=100, value=0)
 
-    property_tax = st.number_input("Annual Property Tax ($)", min_value=0.0)
-    insurance = st.number_input("Annual Insurance ($)", min_value=0.0)
-    maintenance = st.number_input("Annual Maintenance ($)", min_value=0.0)
+    property_tax = st.number_input("Annual Property Tax ($)", min_value=0, step=100, value=0)
+    insurance = st.number_input("Annual Insurance ($)", min_value=0, step=100, value=0)
+    maintenance = st.number_input("Annual Maintenance ($)", min_value=0, step=100, value=0)
 
-    vacancy_rate = st.number_input("Vacancy Rate (%)", 0.0, 100.0) / 100
-    management_fee = st.number_input("Management Fee (%)", 0.0, 100.0) / 100
+    vacancy_rate = st.number_input("Vacancy Rate (%)", 0, 100, value=0) / 100
+    management_fee = st.number_input("Management Fee (%)", 0, 100, value=0) / 100
 
-    down_payment_pct = st.number_input("Down Payment (%)", 0.0, 100.0) / 100
-    interest_rate = st.number_input("Interest Rate (%)", 0.0, 15.0) / 100
-    loan_term = st.number_input("Loan Term (Years)", 1, 40)
+    down_payment_pct = st.number_input("Down Payment (%)", 0, 100, value=0) / 100
+    interest_rate = st.number_input("Interest Rate (%)", 0, 15, value=0) / 100
+    loan_term = st.number_input("Loan Term (Years)", 1, 40, value=30)
 
     closing_cost_pct = st.number_input(
         "Estimated Closing Costs (% of Purchase Price)",
-        min_value=0.0,
-        max_value=10.0,
-        value=3.0
+        min_value=0,
+        max_value=10,
+        value=3
     ) / 100
 
     analyze = st.button("📊 Analyze Deal")
