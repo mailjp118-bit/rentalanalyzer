@@ -5,7 +5,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import streamlit.components.v1 as components
 
-# ================= PAGE CONFIG (MUST BE FIRST STREAMLIT CALL) =================
+# ================= PAGE CONFIG =================
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
 
 # ================= GOOGLE ANALYTICS =================
@@ -22,35 +22,25 @@ components.html(
     height=0,
 )
 
+# ================= ANALYZE BUTTON STATE (FIX) =================
+if "analyze_clicked" not in st.session_state:
+    st.session_state.analyze_clicked = False
+
 # ================= TOP BAR =================
 top_left, top_middle, top_right = st.columns([5, 2, 2])
 
 with top_left:
     st.markdown(
         """
-        <div style="
-            display:flex;
-            align-items:flex-end;
-            gap:14px;
-            margin:8px 0;
-            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-        ">
-          <svg width="48" height="48" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <div style="display:flex; align-items:center; gap:14px; margin:8px 0;">
+          <svg width="48" height="48" viewBox="0 0 64 64">
             <path d="M8 30L32 10L56 30V54H38V40H26V54H8V30Z"
                   fill="rgba(29,161,242,0.25)" stroke="#EAF0FF" stroke-width="2"/>
             <rect x="22" y="34" width="5" height="10" fill="#1DA1F2"/>
             <rect x="30" y="30" width="5" height="14" fill="#1DA1F2"/>
             <rect x="38" y="26" width="5" height="18" fill="#1DA1F2"/>
           </svg>
-
-          <h1 style="
-              font-size:30px;
-              font-weight:800;
-              margin:0;
-              line-height:1;
-          ">
-            Rental Deal Analyzer
-          </h1>
+          <span style="font-size:30px; font-weight:800;">Rental Deal Analyzer</span>
         </div>
         """,
         unsafe_allow_html=True
@@ -58,38 +48,30 @@ with top_left:
 
     st.markdown("""
 ### Know if a rental deal works — Fast & Free  
-Get **cash flow, cap rate, cash-on-cash return, deal score and much more** instantly.
+Get **cash flow, cap rate, cash-on-cash return, deal score and more** instantly.
 """)
 
 with top_middle:
-    breakdown_view = st.selectbox(
-        "📊 View Mode",
-        ["Annual", "Monthly"],
-        index=0
-    )
+    breakdown_view = st.selectbox("📊 View Mode", ["Annual", "Monthly"], index=0)
 
 with top_right:
     excel_btn = st.empty()
     pdf_btn = st.empty()
     st.markdown(
-        "<div style='font-size:14px; margin-top:4px;'>"
-        "📧 Email: <a href='mailto:email@rentaldealanalyzer.com'>"
-        "email@rentaldealanalyzer.com</a></div>",
+        "📧 Email: <a href='mailto:email@rentaldealanalyzer.com'>email@rentaldealanalyzer.com</a>",
         unsafe_allow_html=True
     )
 
-# ================= PRIVACY MESSAGE =================
-st.markdown(
-    """
-    🔒 **Privacy Notice:**  
-    *We do not store or track your deal data. All calculations are performed in real-time and reset when you refresh the page.*
-    """
-)
+# ================= PRIVACY =================
+st.markdown("""
+🔒 **Privacy Notice:**  
+*We do not store or track your deal data. All calculations reset on refresh.*
+""")
 
 # ================= MAIN LAYOUT =================
 col1, spacer1, col2, spacer2, col3 = st.columns([1.2, 0.15, 1, 0.15, 1])
 
-# ================= LEFT COLUMN — DEAL INPUTS =================
+# ================= DEAL INPUTS =================
 with col1:
     st.header("🔢 Deal Inputs")
 
@@ -112,15 +94,15 @@ with col1:
 
     closing_cost_pct = st.number_input(
         "Estimated Closing Costs (% of Purchase Price)",
-        min_value=0,
-        max_value=10,
-        value=3
+        min_value=0, max_value=10, value=3
     ) / 100
 
-    analyze = st.button("📊 Analyze Deal")
+    if st.button("📊 Analyze Deal"):
+        st.session_state.analyze_clicked = True
 
 # ================= CALCULATIONS =================
-if analyze:
+if st.session_state.analyze_clicked:
+
     annual_rent = monthly_rent * 12
     vacancy_loss = annual_rent * vacancy_rate
     management_cost = annual_rent * management_fee
@@ -174,68 +156,34 @@ if analyze:
     down_payment = purchase_price * down_payment_pct
     closing_costs = purchase_price * closing_cost_pct
     total_cash_needed = down_payment + rehab_cost + closing_costs
-    cash_pct_arv = total_cash_needed / arv if arv else 0
 
     st.session_state.results = {
         "Annual Rent": annual_rent,
-        "Monthly Rent": monthly_rent,
-        "NOI Annual": noi_annual,
-        "Cash Flow Annual": cash_flow_annual,
-        "Debt Annual": annual_debt,
-        "Debt Monthly": monthly_payment,
+        "NOI": noi_annual,
+        "Cash Flow": cash_flow_annual,
         "Cap Rate": cap_rate,
-        "CoC": coc_return,
-        "Equity": equity_pct,
-        "Score": deal_score,
+        "Cash-on-Cash Return": coc_return,
+        "Equity %": equity_pct,
+        "Deal Score": deal_score,
         "Rating": rating,
-        "Expenses Annual": expenses_annual,
-        "Total Expenses Annual": total_expenses_annual,
-        "Down Payment": down_payment,
-        "Closing Costs": closing_costs,
         "Total Cash Needed": total_cash_needed,
-        "Cash % ARV": cash_pct_arv
+        "Expenses": expenses_annual
     }
 
-# ================= DOWNLOAD BUTTONS =================
-if "results" in st.session_state:
-    df = pd.DataFrame.from_dict(st.session_state.results, orient="index", columns=["Value"])
-
-    excel_buffer = BytesIO()
-    df.to_excel(excel_buffer)
-    excel_buffer.seek(0)
-
-    excel_btn.download_button(
-        "⬇️ Download Excel",
-        excel_buffer,
-        "rental_deal_analysis.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-
-    pdf_buffer = BytesIO()
-    c = canvas.Canvas(pdf_buffer, pagesize=letter)
-    y = 750
-
-    for k, v in st.session_state.results.items():
-        c.drawString(40, y, f"{k}: {v}")
-        y -= 18
-        if y < 50:
-            c.showPage()
-            y = 750
-
-    c.save()
-    pdf_buffer.seek(0)
-
-    pdf_btn.download_button(
-        "⬇️ Download PDF",
-        pdf_buffer,
-        "rental_deal_analysis.pdf",
-        mime="application/pdf"
-    )
+# ================= RESULTS =================
+with col2:
+    st.header("📈 Deal Results")
+    if "results" in st.session_state:
+        r = st.session_state.results
+        st.metric("Cash Flow (Annual)", f"${r['Cash Flow']:,.0f}")
+        st.metric("Cap Rate", f"{r['Cap Rate']:.2%}")
+        st.metric("Cash-on-Cash Return", f"{r['Cash-on-Cash Return']:.2%}")
+        st.metric("Equity %", f"{r['Equity %']:.2%}")
+        st.metric("Deal Score", f"{r['Deal Score']:.0f}/100")
+        st.subheader(r["Rating"])
 
 # ================= DISCLAIMER =================
 st.markdown("---")
 st.caption(
-    "Disclaimer: This tool is for educational and informational purposes only and does not "
-    "constitute financial, investment, legal, tax, or real estate advice. "
-    "All outputs are estimates, and use of this tool is at your own risk."
+    "This tool is for educational purposes only and does not constitute financial, legal, or investment advice."
 )
