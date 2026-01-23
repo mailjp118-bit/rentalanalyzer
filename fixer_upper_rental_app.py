@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 from io import BytesIO
@@ -31,20 +32,20 @@ with top_left:
     # ✅ Replaced title + logo to match your HTML exactly (SVG + big text)
     st.markdown(
         """
-    <div style="display:flex; align-items:center; gap:12px; margin:8px 0 8px;">
-      <svg width="48" height="48" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8 30L32 10L56 30V54H38V40H26V54H8V30Z"
-              fill="rgba(29,161,242,0.25)" stroke="#EAF0FF" stroke-width="2"/>
-        <rect x="22" y="34" width="5" height="10" fill="#1DA1F2"/>
-        <rect x="30" y="30" width="5" height="14" fill="#1DA1F2"/>
-        <rect x="38" y="26" width="5" height="18" fill="#1DA1F2"/>
-      </svg>
+        <div style="display:flex; align-items:center; gap:14px; margin:8px 0 8px;">
+          <svg width="48" height="48" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 30L32 10L56 30V54H38V40H26V54H8V30Z"
+                  fill="rgba(29,161,242,0.25)" stroke="#EAF0FF" stroke-width="2"/>
+            <rect x="22" y="34" width="5" height="10" fill="#1DA1F2"/>
+            <rect x="30" y="30" width="5" height="14" fill="#1DA1F2"/>
+            <rect x="38" y="26" width="5" height="18" fill="#1DA1F2"/>
+          </svg>
 
-      <span style="font-size:28px; font-weight:800; white-space:nowrap;">Rental Deal Analyzer</span>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+          <span style="font-size:50px; font-weight:800;">Rental Deal Analyzer</span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     st.markdown("""
 ### Know if a rental deal works — Fast & Free.  
