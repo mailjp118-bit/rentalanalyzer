@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 from io import BytesIO
@@ -5,12 +6,14 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import streamlit.components.v1 as components
 
-# ================= PAGE CONFIG =================
+# ================= PAGE CONFIG (MUST BE FIRST STREAMLIT CALL) ================= Deal inputs in this tool starts with 0.00 be default. Can it be changed to 0. No other change.
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
+#st.image("assets/logo2.png", use_container_width=True)
 
 # ================= GOOGLE ANALYTICS =================
 components.html(
     """
+    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-DMLKRR0K9P"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -22,25 +25,23 @@ components.html(
     height=0,
 )
 
-# ================= BUTTON STATE FIX (ONLY CHANGE) =================
-if "analyze_clicked" not in st.session_state:
-    st.session_state.analyze_clicked = False
-
 # ================= TOP BAR =================
 top_left, top_middle, top_right = st.columns([5, 2, 2])
 
 with top_left:
+    # ✅ Replaced title + logo to match your HTML exactly (SVG + big text)
     st.markdown(
         """
         <div style="display:flex; align-items:center; gap:14px; margin:8px 0 8px;">
-          <svg width="48" height="48" viewBox="0 0 64 64">
+          <svg width="48" height="48" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
             <path d="M8 30L32 10L56 30V54H38V40H26V54H8V30Z"
                   fill="rgba(29,161,242,0.25)" stroke="#EAF0FF" stroke-width="2"/>
             <rect x="22" y="34" width="5" height="10" fill="#1DA1F2"/>
             <rect x="30" y="30" width="5" height="14" fill="#1DA1F2"/>
             <rect x="38" y="26" width="5" height="18" fill="#1DA1F2"/>
           </svg>
-          <span style="font-size:50px; font-weight:800;">Rental Deal Analyzer</span>
+
+          <span style="font-size:30px; font-weight:800;">Rental Deal Analyzer</span>
         </div>
         """,
         unsafe_allow_html=True
@@ -52,14 +53,19 @@ Get **cash flow, cap rate, cash-on-cash return, deal score and much more** insta
 """)
 
 with top_middle:
-    breakdown_view = st.selectbox("📊 View Mode", ["Annual", "Monthly"], index=0)
+    breakdown_view = st.selectbox(
+        "📊 View Mode",
+        ["Annual", "Monthly"],
+        index=0
+    )
 
 with top_right:
     excel_btn = st.empty()
     pdf_btn = st.empty()
     st.markdown(
         "<div style='font-size:14px; margin-top:4px;'>"
-        "📧 Email: <a href='mailto:email@rentaldealanalyzer.com'>email@rentaldealanalyzer.com</a></div>",
+        "📧 Email: <a href='mailto:email@rentaldealanalyzer.com'>"
+        "email@rentaldealanalyzer.com</a></div>",
         unsafe_allow_html=True
     )
 
@@ -102,12 +108,10 @@ with col1:
         value=3
     ) / 100
 
-    if st.button("📊 Analyze Deal"):
-        st.session_state.analyze_clicked = True
+    analyze = st.button("📊 Analyze Deal")
 
 # ================= CALCULATIONS =================
-if st.session_state.analyze_clicked:
-
+if analyze:
     annual_rent = monthly_rent * 12
     vacancy_loss = annual_rent * vacancy_rate
     management_cost = annual_rent * management_fee
@@ -183,8 +187,89 @@ if st.session_state.analyze_clicked:
         "Cash % ARV": cash_pct_arv
     }
 
-# ================= RESULTS + DOWNLOADS (UNCHANGED) =================
-# (Your existing middle + right column + Excel/PDF logic works as-is)
+# ================= MIDDLE COLUMN — DEAL RESULTS =================
+with col2:
+    st.header("📈 Deal Results")
+
+    if "results" in st.session_state:
+        r = st.session_state.results
+
+        if breakdown_view == "Annual":
+            st.metric("Rent", f"${r['Annual Rent']:,.0f}", help="Total gross rental income per year.")
+            st.metric("NOI", f"${r['NOI Annual']:,.0f}", help="Net Operating Income before debt service.")
+            st.metric("Cash Flow", f"${r['Cash Flow Annual']:,.0f}", help="Annual cash remaining after all expenses and debt service.")
+            st.metric("Debt Service", f"${r['Debt Annual']:,.0f}", help="Total annual mortgage payments (principal + interest).")
+        else:
+            st.metric("Rent", f"${r['Monthly Rent']:,.0f}", help="Gross rental income per month.")
+            st.metric("NOI", f"${r['NOI Annual']/12:,.0f}", help="Monthly Net Operating Income before debt service.")
+            st.metric("Cash Flow", f"${r['Cash Flow Annual']/12:,.0f}", help="Monthly cash remaining after expenses and debt service.")
+            st.metric("Debt Service", f"${r['Debt Monthly']:,.0f}", help="Monthly mortgage payment (principal + interest).")
+
+        st.metric("Cap Rate", f"{r['Cap Rate']:.2%}", help="NOI divided by total investment cost.")
+        st.metric("Cash-on-Cash Return", f"{r['CoC']:.2%}", help="Annual cash flow divided by cash invested.")
+        st.metric("Equity %", f"{r['Equity']:.2%}", help="Percentage of property value owned after purchase and rehab.")
+        st.metric("Rental Deal Score", f"{r['Score']:.0f}/100", help="Overall deal strength score based on returns and equity.")
+        st.subheader(r["Rating"])
+
+# ================= RIGHT COLUMN — EXPENSES + CASH =================
+with col3:
+    st.header("💸 Expense Breakdown")
+
+    if "results" in st.session_state:
+        r = st.session_state.results
+
+        if breakdown_view == "Annual":
+            for name, value in r["Expenses Annual"].items():
+                st.write(f"**{name}**: ${value:,.0f}")
+            st.write(f"**Total Expenses:** ${r['Total Expenses Annual']:,.0f}")
+        else:
+            for name, value in r["Expenses Annual"].items():
+                st.write(f"**{name}**: ${value/12:,.0f}")
+            st.write(f"**Total Expenses:** ${r['Total Expenses Annual']/12:,.0f}")
+
+        st.subheader("💰 Cash Required at Closing")
+
+        st.write(f"Down Payment: ${r['Down Payment']:,.0f}")
+        st.write(f"Rehab Budget: ${rehab_cost:,.0f}")
+        st.write(f"Closing Costs: ${r['Closing Costs']:,.0f}")
+        st.write(f"**Total Cash Needed:** ${r['Total Cash Needed']:,.0f}")
+        st.write(f"Cash Needed as % of ARV: {r['Cash % ARV']:.1%}")
+
+# ================= DOWNLOAD BUTTONS =================
+if "results" in st.session_state:
+    df = pd.DataFrame.from_dict(st.session_state.results, orient="index", columns=["Value"])
+
+    excel_buffer = BytesIO()
+    df.to_excel(excel_buffer)
+    excel_buffer.seek(0)
+
+    excel_btn.download_button(
+        "⬇️ Download Excel",
+        excel_buffer,
+        "rental_deal_analysis.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+    pdf_buffer = BytesIO()
+    c = canvas.Canvas(pdf_buffer, pagesize=letter)
+    y = 750
+
+    for k, v in st.session_state.results.items():
+        c.drawString(40, y, f"{k}: {v}")
+        y -= 18
+        if y < 50:
+            c.showPage()
+            y = 750
+
+    c.save()
+    pdf_buffer.seek(0)
+
+    pdf_btn.download_button(
+        "⬇️ Download PDF",
+        pdf_buffer,
+        "rental_deal_analysis.pdf",
+        mime="application/pdf"
+    )
 
 # ================= DISCLAIMER =================
 st.markdown("---")
