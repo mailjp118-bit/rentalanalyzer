@@ -31,7 +31,7 @@ with top_left:
     # ✅ Replaced title + logo to match your HTML exactly (SVG + big text)
     st.markdown(
         """
-        <div style="display:flex; align-items:center; gap:14px; margin:8px 0 8px;">
+        <div style="display:flex; align-items:center; gap:12px; margin:8px 0 8px;">
           <svg width="48" height="48" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
             <path d="M8 30L32 10L56 30V54H38V40H26V54H8V30Z"
                   fill="rgba(29,161,242,0.25)" stroke="#EAF0FF" stroke-width="2"/>
