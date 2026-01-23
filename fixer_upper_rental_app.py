@@ -41,7 +41,7 @@ with top_left:
             <rect x="38" y="26" width="5" height="18" fill="#1DA1F2"/>
           </svg>
 
-          <span style="font-size:50px; font-weight:800;">Rental Deal Analyzer</span>
+          <span style="font-size:30px; font-weight:800;">Rental Deal Analyzer</span>
         </div>
         """,
         unsafe_allow_html=True
