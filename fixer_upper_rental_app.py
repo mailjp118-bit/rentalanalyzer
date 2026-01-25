@@ -15,7 +15,7 @@ st.markdown(
     <style>
     /* Increase tab height and font size */
     div[data-baseweb="tab"] > button {
-        font-size: 18px !important;     /* text size */
+        font-size: 30px !important;     /* text size */
         font-weight: 700 !important;    /* bold */
         border-radius: 10px;
         padding: 12px 24px !important;  /* height & width */
