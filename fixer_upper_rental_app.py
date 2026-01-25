@@ -14,7 +14,7 @@ st.markdown("""
 <style>
 /* Remove top padding from main container */
 .block-container {
-    padding-top: 0.5rem !important;
+    padding-top: 4rem !important;
 }
 
 /* Remove margin above tabs */
