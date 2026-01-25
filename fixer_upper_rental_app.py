@@ -10,48 +10,27 @@ import streamlit.components.v1 as components
 # ================= PAGE CONFIG (MUST BE FIRST STREAMLIT CALL) =================
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
 # ================= TAB SIZE STYLING =================
-# ================= TAB COLOR STYLING =================
-st.markdown(
-    """
-    <style>
-    /* Base tab style */
-    div[data-baseweb="tab"] > button {
-        font-size: 25px !important;
-        font-weight: 700 !important;
-        padding: 12px 24px !important;
-        min-height: 55px !important;
-        border-radius: 12px 12px 0 0 !important;
-        transition: all 0.2s ease-in-out;
-    }
+st.markdown("""
+<style>
+/* Increase tab font size */
+button[data-baseweb="tab"] {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    padding: 12px 20px !important;
+}
 
-    /* RENTAL TAB (1st tab) */
-    div[data-baseweb="tab"]:nth-child(1) > button {
-        background-color: rgba(29,161,242,0.12);
-        color: #1DA1F2 !important;
-    }
+/* Increase tab height */
+button[data-baseweb="tab"] > div {
+    padding: 12px 20px !important;
+}
 
-    /* FLIP TAB (2nd tab) */
-    div[data-baseweb="tab"]:nth-child(2) > button {
-        background-color: rgba(255,152,0,0.15);
-        color: #FB8C00 !important;
-    }
+/* Active tab underline thicker */
+button[data-baseweb="tab"][aria-selected="true"] {
+    border-bottom: 4px solid #1DA1F2 !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
-    /* ACTIVE TAB */
-    div[data-baseweb="tab"] > button[aria-selected="true"] {
-        background-color: white !important;
-        color: black !important;
-        border-bottom: 3px solid #1DA1F2 !important;
-    }
-
-    /* Active Flip tab bottom border */
-    div[data-baseweb="tab"]:nth-child(2) > button[aria-selected="true"] {
-        border-bottom: 3px solid #FB8C00 !important;
-    }
-
-    </style>
-    """,
-    unsafe_allow_html=True
-)
 
 
 # st.image("assets/logo2.png", use_container_width=True)
