@@ -16,7 +16,7 @@ st.markdown(
     <style>
     /* Base tab style */
     div[data-baseweb="tab"] > button {
-        font-size: 18px !important;
+        font-size: 25px !important;
         font-weight: 700 !important;
         padding: 12px 24px !important;
         min-height: 55px !important;
