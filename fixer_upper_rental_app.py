@@ -3,14 +3,17 @@ import pandas as pd
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
 import streamlit.components.v1 as components
 
-# ================= PAGE CONFIG =================
+# ================= PAGE CONFIG (MUST BE FIRST STREAMLIT CALL) =================
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
+#st.image("assets/logo2.png", use_container_width=True)
 
 # ================= GOOGLE ANALYTICS =================
 components.html(
     """
+    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-DMLKRR0K9P"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -26,9 +29,18 @@ components.html(
 top_left, top_middle, top_right = st.columns([5, 2, 2])
 
 with top_left:
+    # ✅ Replaced title + logo to match your HTML exactly (SVG + big text)
     st.markdown(
         """
-        <div style="display:flex; align-items:center; gap:14px;">
+        <div style="display:flex; align-items:center; gap:14px; margin:8px 0 8px;">
+          <svg width="48" height="48" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 30L32 10L56 30V54H38V40H26V54H8V30Z"
+                  fill="rgba(29,161,242,0.25)" stroke="#EAF0FF" stroke-width="2"/>
+            <rect x="22" y="34" width="5" height="10" fill="#1DA1F2"/>
+            <rect x="30" y="30" width="5" height="14" fill="#1DA1F2"/>
+            <rect x="38" y="26" width="5" height="18" fill="#1DA1F2"/>
+          </svg>
+
           <span style="font-size:30px; font-weight:800;">Rental Deal Analyzer</span>
         </div>
         """,
@@ -41,17 +53,29 @@ Get **cash flow, cap rate, cash-on-cash return, deal score and much more** insta
 """)
 
 with top_middle:
-    breakdown_view = st.selectbox("📊 View Mode", ["Annual", "Monthly"], index=0)
+    breakdown_view = st.selectbox(
+        "📊 View Mode",
+        ["Annual", "Monthly"],
+        index=0
+    )
 
 with top_right:
     excel_btn = st.empty()
     pdf_btn = st.empty()
+    st.markdown(
+        "<div style='font-size:14px; margin-top:4px;'>"
+        "📧 Email: <a href='mailto:email@rentaldealanalyzer.com'>"
+        "email@rentaldealanalyzer.com</a></div>",
+        unsafe_allow_html=True
+    )
 
 # ================= PRIVACY MESSAGE =================
-st.markdown("""
-🔒 **Privacy Notice:**  
-*We do not store or track your deal data. All calculations are performed in real-time and reset when you refresh the page.*
-""")
+st.markdown(
+    """
+    🔒 **Privacy Notice:**  
+    *We do not store or track your deal data. All calculations are performed in real-time and reset when you refresh the page.*
+    """
+)
 
 # ================= MAIN LAYOUT =================
 col1, spacer1, col2, spacer2, col3 = st.columns([1.2, 0.15, 1, 0.15, 1])
@@ -66,9 +90,9 @@ with col1:
 
     monthly_rent = st.number_input("Monthly Rent ($)", min_value=0, step=100, value=0)
 
-    property_tax = st.number_input("Annual Property Tax ($)", min_value=0, value=0)
-    insurance = st.number_input("Annual Insurance ($)", min_value=0, value=0)
-    maintenance = st.number_input("Annual Maintenance ($)", min_value=0, value=0)
+    property_tax = st.number_input("Annual Property Tax ($)", min_value=0, step=100, value=0)
+    insurance = st.number_input("Annual Insurance ($)", min_value=0, step=100, value=0)
+    maintenance = st.number_input("Annual Maintenance ($)", min_value=0, step=100, value=0)
 
     vacancy_rate = st.number_input("Vacancy Rate (%)", 0, 100, value=0) / 100
     management_fee = st.number_input("Management Fee (%)", 0, 100, value=0) / 100
@@ -77,7 +101,13 @@ with col1:
     interest_rate = st.number_input("Interest Rate (%)", 0, 15, value=0) / 100
     loan_term = st.number_input("Loan Term (Years)", 1, 40, value=30)
 
-    closing_cost_pct = st.number_input("Estimated Closing Costs (%)", 0, 10, value=3) / 100
+    closing_cost_pct = st.number_input(
+        "Estimated Closing Costs (% of Purchase Price)",
+        min_value=0,
+        max_value=10,
+        value=3
+    ) / 100
+
     analyze = st.button("📊 Analyze Deal")
 
 # ================= CALCULATIONS =================
@@ -101,11 +131,12 @@ if analyze:
     monthly_rate = interest_rate / 12
     total_payments = loan_term * 12
 
-    monthly_payment = (
-        loan_amount * (monthly_rate * (1 + monthly_rate) ** total_payments) /
-        ((1 + monthly_rate) ** total_payments - 1)
-        if interest_rate > 0 else loan_amount / total_payments
-    )
+    if interest_rate > 0:
+        monthly_payment = loan_amount * (
+            monthly_rate * (1 + monthly_rate) ** total_payments
+        ) / ((1 + monthly_rate) ** total_payments - 1)
+    else:
+        monthly_payment = loan_amount / total_payments
 
     annual_debt = monthly_payment * 12
     cash_flow_annual = noi_annual - annual_debt
@@ -117,40 +148,181 @@ if analyze:
     coc_return = cash_flow_annual / cash_invested if cash_invested else 0
     equity_pct = (arv - total_investment) / arv if arv else 0
 
-    deal_score = min(100,
+    deal_score = min(
+        100,
         (coc_return / 0.15 * 40) +
         (cap_rate / 0.10 * 30) +
         (equity_pct / 0.20 * 30)
     )
 
+    rating = (
+        "🔥 Excellent Deal" if deal_score >= 85 else
+        "✅ Strong Deal" if deal_score >= 70 else
+        "⚠️ Marginal Deal" if deal_score >= 50 else
+        "❌ Weak Deal"
+    )
+
+    down_payment = purchase_price * down_payment_pct
+    closing_costs = purchase_price * closing_cost_pct
+    total_cash_needed = down_payment + rehab_cost + closing_costs
+    cash_pct_arv = total_cash_needed / arv if arv else 0
+
     st.session_state.results = {
-        "Annual Rent ($)": annual_rent,
-        "NOI ($)": noi_annual,
-        "Cash Flow ($)": cash_flow_annual,
-        "Debt Annual ($)": annual_debt,
-        "Cap Rate (%)": cap_rate,
-        "Cash-on-Cash (%)": coc_return,
-        "Equity (%)": equity_pct,
-        "Deal Score": deal_score
+        "Annual Rent": annual_rent,
+        "Monthly Rent": monthly_rent,
+        "NOI Annual": noi_annual,
+        "Cash Flow Annual": cash_flow_annual,
+        "Debt Annual": annual_debt,
+        "Debt Monthly": monthly_payment,
+        "Cap Rate": cap_rate,
+        "CoC": coc_return,
+        "Equity": equity_pct,
+        "Score": deal_score,
+        "Rating": rating,
+        "Expenses Annual": expenses_annual,
+        "Total Expenses Annual": total_expenses_annual,
+        "Down Payment": down_payment,
+        "Closing Costs": closing_costs,
+        "Total Cash Needed": total_cash_needed,
+        "Cash % ARV": cash_pct_arv
     }
 
-# ================= EXPORT FORMATTING =================
-def format_value(k, v):
-    if "(%)" in k:
-        return f"{v*100:.2f}%"
-    if "($)" in k:
-        return f"${v:,.2f}"
-    return f"{v:.2f}"
+# ================= MIDDLE COLUMN — DEAL RESULTS =================
+with col2:
+    st.header("📈 Deal Results")
 
-# ================= DOWNLOAD BUTTONS =================
+    if "results" in st.session_state:
+        r = st.session_state.results
+
+        if breakdown_view == "Annual":
+            st.metric("Rent", f"${r['Annual Rent']:,.0f}", help="Total gross rental income per year.")
+            st.metric("NOI", f"${r['NOI Annual']:,.0f}", help="Net Operating Income before debt service.")
+            st.metric("Cash Flow", f"${r['Cash Flow Annual']:,.0f}", help="Annual cash remaining after all expenses and debt service.")
+            st.metric("Debt Service", f"${r['Debt Annual']:,.0f}", help="Total annual mortgage payments (principal + interest).")
+        else:
+            st.metric("Rent", f"${r['Monthly Rent']:,.0f}", help="Gross rental income per month.")
+            st.metric("NOI", f"${r['NOI Annual']/12:,.0f}", help="Monthly Net Operating Income before debt service.")
+            st.metric("Cash Flow", f"${r['Cash Flow Annual']/12:,.0f}", help="Monthly cash remaining after expenses and debt service.")
+            st.metric("Debt Service", f"${r['Debt Monthly']:,.0f}", help="Monthly mortgage payment (principal + interest).")
+
+        st.metric("Cap Rate", f"{r['Cap Rate']:.2%}", help="NOI divided by total investment cost.")
+        st.metric("Cash-on-Cash Return", f"{r['CoC']:.2%}", help="Annual cash flow divided by cash invested.")
+        st.metric("Equity %", f"{r['Equity']:.2%}", help="Percentage of property value owned after purchase and rehab.")
+        st.metric("Rental Deal Score", f"{r['Score']:.0f}/100", help="Overall deal strength score based on returns and equity.")
+        st.subheader(r["Rating"])
+
+# ================= RIGHT COLUMN — EXPENSES + CASH =================
+with col3:
+    st.header("💸 Expense Breakdown")
+
+    if "results" in st.session_state:
+        r = st.session_state.results
+
+        if breakdown_view == "Annual":
+            for name, value in r["Expenses Annual"].items():
+                st.write(f"**{name}**: ${value:,.0f}")
+            st.write(f"**Total Expenses:** ${r['Total Expenses Annual']:,.0f}")
+        else:
+            for name, value in r["Expenses Annual"].items():
+                st.write(f"**{name}**: ${value/12:,.0f}")
+            st.write(f"**Total Expenses:** ${r['Total Expenses Annual']/12:,.0f}")
+
+        st.subheader("💰 Cash Required at Closing")
+
+        st.write(f"Down Payment: ${r['Down Payment']:,.0f}")
+        st.write(f"Rehab Budget: ${rehab_cost:,.0f}")
+        st.write(f"Closing Costs: ${r['Closing Costs']:,.0f}")
+        st.write(f"**Total Cash Needed:** ${r['Total Cash Needed']:,.0f}")
+        st.write(f"Cash Needed as % of ARV: {r['Cash % ARV']:.1%}")
+
+# ================= DOWNLOAD BUTTONS (UPDATED: LOGO + TITLE + FORMATTED VALUES) =================
+LOGO_PATH = "assets/logo2.png"
+APP_TITLE = "Rental Deal Analyzer"
+APP_TAGLINE = "Know if a rental deal works — Fast & Free."
+
+def _is_percent_field(key: str) -> bool:
+    k = key.lower()
+    return any(x in k for x in [
+        "cap rate", "coc", "cash-on-cash", "equity", "vacancy", "management fee",
+        "down payment (%)", "cash % arv", "%", "interest rate"
+    ])
+
+def _is_money_field(key: str) -> bool:
+    k = key.lower()
+    return any(x in k for x in [
+        "rent", "noi", "cash flow", "debt", "down payment", "closing", "total",
+        "expense", "tax", "insurance", "maintenance", "rehab", "loan", "investment"
+    ])
+
+def _fmt_value(key, val):
+    # Keep strings as-is (e.g., Rating)
+    if isinstance(val, str):
+        return val
+
+    # Dicts (like Expenses Annual) handled elsewhere
+    if isinstance(val, dict):
+        return ""
+
+    # Numbers formatting
+    try:
+        num = float(val)
+    except Exception:
+        return str(val)
+
+    if _is_percent_field(str(key)):
+        return f"{num * 100:.2f}%"
+    if _is_money_field(str(key)):
+        return f"${num:,.2f}"
+    # Score fallback (still 2 decimals)
+    return f"{num:,.2f}"
+
+def _build_export_rows(results: dict):
+    rows = []
+    for k, v in results.items():
+        if isinstance(v, dict):
+            # Expand nested dict as individual rows
+            rows.append((str(k), ""))  # section label
+            for kk, vv in v.items():
+                rows.append((f"  - {kk}", _fmt_value(kk, vv)))
+        else:
+            rows.append((str(k), _fmt_value(k, v)))
+    return rows
+
 if "results" in st.session_state:
-    formatted = {k: format_value(k, v) for k, v in st.session_state.results.items()}
-    df = pd.DataFrame(formatted.items(), columns=["Metric", "Value"])
+    export_rows = _build_export_rows(st.session_state.results)
+    export_df = pd.DataFrame(export_rows, columns=["Metric", "Value"])
 
+    # -------- Excel (with logo + title) --------
     excel_buffer = BytesIO()
-    df.to_excel(excel_buffer, index=False)
-    excel_buffer.seek(0)
+    with pd.ExcelWriter(excel_buffer, engine="openpyxl") as writer:
+        export_df.to_excel(writer, index=False, sheet_name="Results", startrow=6)
+        ws = writer.book["Results"]
 
+        # Title + tagline
+        ws["A1"] = APP_TITLE
+        ws["A2"] = APP_TAGLINE
+        ws["A1"].font = ws["A1"].font.copy(bold=True, size=16)
+        ws["A2"].font = ws["A2"].font.copy(size=11)
+
+        # Merge title cells a bit (A1:D1, A2:D2)
+        ws.merge_cells("A1:D1")
+        ws.merge_cells("A2:D2")
+
+        # Insert logo (top-right-ish)
+        try:
+            from openpyxl.drawing.image import Image as XLImage
+            logo = XLImage(LOGO_PATH)
+            logo.width = 140
+            logo.height = 40
+            ws.add_image(logo, "E1")
+        except Exception:
+            pass
+
+        # Column widths
+        ws.column_dimensions["A"].width = 30
+        ws.column_dimensions["B"].width = 22
+
+    excel_buffer.seek(0)
     excel_btn.download_button(
         "⬇️ Download Excel",
         excel_buffer,
@@ -158,13 +330,46 @@ if "results" in st.session_state:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
+    # -------- PDF (with logo + title) --------
     pdf_buffer = BytesIO()
     c = canvas.Canvas(pdf_buffer, pagesize=letter)
-    y = 750
 
-    for k, v in formatted.items():
-        c.drawString(40, y, f"{k}: {v}")
-        y -= 18
+    # Header (logo + title)
+    top_y = 760
+    try:
+        logo_img = ImageReader(LOGO_PATH)
+        c.drawImage(logo_img, 40, top_y - 35, width=120, height=35, mask="auto")
+    except Exception:
+        pass
+
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(170, top_y - 15, APP_TITLE)
+    c.setFont("Helvetica", 10)
+    c.drawString(170, top_y - 30, APP_TAGLINE)
+
+    # Body
+    y = 700
+    c.setFont("Helvetica", 10)
+
+    for metric, value in export_rows:
+        # Section headers (like "Expenses Annual") where Value is empty
+        if value == "" and not metric.startswith("  - "):
+            c.setFont("Helvetica-Bold", 11)
+            c.drawString(40, y, str(metric))
+            y -= 16
+            c.setFont("Helvetica", 10)
+        else:
+            c.drawString(50, y, f"{metric}: {value}")
+            y -= 14
+
+        if y < 60:
+            c.showPage()
+            y = 750
+            # repeat small header on new page
+            c.setFont("Helvetica-Bold", 12)
+            c.drawString(40, y, APP_TITLE)
+            y -= 20
+            c.setFont("Helvetica", 10)
 
     c.save()
     pdf_buffer.seek(0)
@@ -179,5 +384,7 @@ if "results" in st.session_state:
 # ================= DISCLAIMER =================
 st.markdown("---")
 st.caption(
-    "Disclaimer: Educational use only. Not financial, legal, or investment advice."
+    "Disclaimer: This tool is for educational and informational purposes only and does not "
+    "constitute financial, investment, legal, tax, or real estate advice. "
+    "All outputs are estimates, and use of this tool is at your own risk."
 )
