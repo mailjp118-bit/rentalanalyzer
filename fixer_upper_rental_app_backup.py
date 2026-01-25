@@ -3,31 +3,50 @@ import pandas as pd
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
+import streamlit.components.v1 as components
 
 # ================= PAGE CONFIG (MUST BE FIRST STREAMLIT CALL) =================
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
-#st.image("assets/logo.png", use_container_width=True)
+#st.image("assets/logo2.png", use_container_width=True)
 
 # ================= GOOGLE ANALYTICS =================
-st.markdown("""
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-DMLKRR0K9P"></script>
-<script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-DMLKRR0K9P');
-</script>
-""", unsafe_allow_html=True)
-
-# ================= PAGE CONFIG =================
-#st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
+components.html(
+    """
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DMLKRR0K9P"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-DMLKRR0K9P', { 'send_page_view': true });
+    </script>
+    """,
+    height=0,
+)
 
 # ================= TOP BAR =================
 top_left, top_middle, top_right = st.columns([5, 2, 2])
 
 with top_left:
-    st.title("🏚️ Rental Deal Analyzer")
+    # ✅ Replaced title + logo to match your HTML exactly (SVG + big text)
+    st.markdown(
+        """
+        <div style="display:flex; align-items:center; gap:14px; margin:8px 0 8px;">
+          <svg width="48" height="48" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 30L32 10L56 30V54H38V40H26V54H8V30Z"
+                  fill="rgba(29,161,242,0.25)" stroke="#EAF0FF" stroke-width="2"/>
+            <rect x="22" y="34" width="5" height="10" fill="#1DA1F2"/>
+            <rect x="30" y="30" width="5" height="14" fill="#1DA1F2"/>
+            <rect x="38" y="26" width="5" height="18" fill="#1DA1F2"/>
+          </svg>
+
+          <span style="font-size:30px; font-weight:800;">Rental Deal Analyzer</span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
     st.markdown("""
 ### Know if a rental deal works — Fast & Free.  
 Get **cash flow, cap rate, cash-on-cash return, deal score and much more** instantly.
@@ -65,28 +84,28 @@ col1, spacer1, col2, spacer2, col3 = st.columns([1.2, 0.15, 1, 0.15, 1])
 with col1:
     st.header("🔢 Deal Inputs")
 
-    purchase_price = st.number_input("Purchase Price ($)", min_value=0.0, step=1000.0)
-    rehab_cost = st.number_input("Rehab Cost ($)", min_value=0.0, step=1000.0)
-    arv = st.number_input("After Repair Value (ARV) ($)", min_value=0.0, step=1000.0)
+    purchase_price = st.number_input("Purchase Price ($)", min_value=0, step=1000, value=0)
+    rehab_cost = st.number_input("Rehab Cost ($)", min_value=0, step=1000, value=0)
+    arv = st.number_input("After Repair Value (ARV) ($)", min_value=0, step=1000, value=0)
 
-    monthly_rent = st.number_input("Monthly Rent ($)", min_value=0.0, step=100.0)
+    monthly_rent = st.number_input("Monthly Rent ($)", min_value=0, step=100, value=0)
 
-    property_tax = st.number_input("Annual Property Tax ($)", min_value=0.0)
-    insurance = st.number_input("Annual Insurance ($)", min_value=0.0)
-    maintenance = st.number_input("Annual Maintenance ($)", min_value=0.0)
+    property_tax = st.number_input("Annual Property Tax ($)", min_value=0, step=100, value=0)
+    insurance = st.number_input("Annual Insurance ($)", min_value=0, step=100, value=0)
+    maintenance = st.number_input("Annual Maintenance ($)", min_value=0, step=100, value=0)
 
-    vacancy_rate = st.number_input("Vacancy Rate (%)", 0.0, 100.0) / 100
-    management_fee = st.number_input("Management Fee (%)", 0.0, 100.0) / 100
+    vacancy_rate = st.number_input("Vacancy Rate (%)", 0, 100, value=0) / 100
+    management_fee = st.number_input("Management Fee (%)", 0, 100, value=0) / 100
 
-    down_payment_pct = st.number_input("Down Payment (%)", 0.0, 100.0) / 100
-    interest_rate = st.number_input("Interest Rate (%)", 0.0, 15.0) / 100
-    loan_term = st.number_input("Loan Term (Years)", 1, 40)
+    down_payment_pct = st.number_input("Down Payment (%)", 0, 100, value=0) / 100
+    interest_rate = st.number_input("Interest Rate (%)", 0, 15, value=0) / 100
+    loan_term = st.number_input("Loan Term (Years)", 1, 40, value=30)
 
     closing_cost_pct = st.number_input(
         "Estimated Closing Costs (% of Purchase Price)",
-        min_value=0.0,
-        max_value=10.0,
-        value=3.0
+        min_value=0,
+        max_value=10,
+        value=3
     ) / 100
 
     analyze = st.button("📊 Analyze Deal")
@@ -216,14 +235,94 @@ with col3:
         st.write(f"**Total Cash Needed:** ${r['Total Cash Needed']:,.0f}")
         st.write(f"Cash Needed as % of ARV: {r['Cash % ARV']:.1%}")
 
-# ================= DOWNLOAD BUTTONS =================
+# ================= DOWNLOAD BUTTONS (UPDATED: LOGO + TITLE + FORMATTED VALUES) =================
+LOGO_PATH = "assets/logo2.png"
+APP_TITLE = "Rental Deal Analyzer"
+APP_TAGLINE = "Know if a rental deal works — Fast & Free."
+
+def _is_percent_field(key: str) -> bool:
+    k = key.lower()
+    return any(x in k for x in [
+        "cap rate", "coc", "cash-on-cash", "equity", "vacancy", "management fee",
+        "down payment (%)", "cash % arv", "%", "interest rate"
+    ])
+
+def _is_money_field(key: str) -> bool:
+    k = key.lower()
+    return any(x in k for x in [
+        "rent", "noi", "cash flow", "debt", "down payment", "closing", "total",
+        "expense", "tax", "insurance", "maintenance", "rehab", "loan", "investment"
+    ])
+
+def _fmt_value(key, val):
+    # Keep strings as-is (e.g., Rating)
+    if isinstance(val, str):
+        return val
+
+    # Dicts (like Expenses Annual) handled elsewhere
+    if isinstance(val, dict):
+        return ""
+
+    # Numbers formatting
+    try:
+        num = float(val)
+    except Exception:
+        return str(val)
+
+    if _is_percent_field(str(key)):
+        return f"{num * 100:.2f}%"
+    if _is_money_field(str(key)):
+        return f"${num:,.2f}"
+    # Score fallback (still 2 decimals)
+    return f"{num:,.2f}"
+
+def _build_export_rows(results: dict):
+    rows = []
+    for k, v in results.items():
+        if isinstance(v, dict):
+            # Expand nested dict as individual rows
+            rows.append((str(k), ""))  # section label
+            for kk, vv in v.items():
+                rows.append((f"  - {kk}", _fmt_value(kk, vv)))
+        else:
+            rows.append((str(k), _fmt_value(k, v)))
+    return rows
+
 if "results" in st.session_state:
-    df = pd.DataFrame.from_dict(st.session_state.results, orient="index", columns=["Value"])
+    export_rows = _build_export_rows(st.session_state.results)
+    export_df = pd.DataFrame(export_rows, columns=["Metric", "Value"])
 
+    # -------- Excel (with logo + title) --------
     excel_buffer = BytesIO()
-    df.to_excel(excel_buffer)
-    excel_buffer.seek(0)
+    with pd.ExcelWriter(excel_buffer, engine="openpyxl") as writer:
+        export_df.to_excel(writer, index=False, sheet_name="Results", startrow=6)
+        ws = writer.book["Results"]
 
+        # Title + tagline
+        ws["A1"] = APP_TITLE
+        ws["A2"] = APP_TAGLINE
+        ws["A1"].font = ws["A1"].font.copy(bold=True, size=16)
+        ws["A2"].font = ws["A2"].font.copy(size=11)
+
+        # Merge title cells a bit (A1:D1, A2:D2)
+        ws.merge_cells("A1:D1")
+        ws.merge_cells("A2:D2")
+
+        # Insert logo (top-right-ish)
+        try:
+            from openpyxl.drawing.image import Image as XLImage
+            logo = XLImage(LOGO_PATH)
+            logo.width = 140
+            logo.height = 40
+            ws.add_image(logo, "E1")
+        except Exception:
+            pass
+
+        # Column widths
+        ws.column_dimensions["A"].width = 30
+        ws.column_dimensions["B"].width = 22
+
+    excel_buffer.seek(0)
     excel_btn.download_button(
         "⬇️ Download Excel",
         excel_buffer,
@@ -231,16 +330,46 @@ if "results" in st.session_state:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
+    # -------- PDF (with logo + title) --------
     pdf_buffer = BytesIO()
     c = canvas.Canvas(pdf_buffer, pagesize=letter)
-    y = 750
 
-    for k, v in st.session_state.results.items():
-        c.drawString(40, y, f"{k}: {v}")
-        y -= 18
-        if y < 50:
+    # Header (logo + title)
+    top_y = 760
+    try:
+        logo_img = ImageReader(LOGO_PATH)
+        c.drawImage(logo_img, 40, top_y - 35, width=120, height=35, mask="auto")
+    except Exception:
+        pass
+
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(170, top_y - 15, APP_TITLE)
+    c.setFont("Helvetica", 10)
+    c.drawString(170, top_y - 30, APP_TAGLINE)
+
+    # Body
+    y = 700
+    c.setFont("Helvetica", 10)
+
+    for metric, value in export_rows:
+        # Section headers (like "Expenses Annual") where Value is empty
+        if value == "" and not metric.startswith("  - "):
+            c.setFont("Helvetica-Bold", 11)
+            c.drawString(40, y, str(metric))
+            y -= 16
+            c.setFont("Helvetica", 10)
+        else:
+            c.drawString(50, y, f"{metric}: {value}")
+            y -= 14
+
+        if y < 60:
             c.showPage()
             y = 750
+            # repeat small header on new page
+            c.setFont("Helvetica-Bold", 12)
+            c.drawString(40, y, APP_TITLE)
+            y -= 20
+            c.setFont("Helvetica", 10)
 
     c.save()
     pdf_buffer.seek(0)
