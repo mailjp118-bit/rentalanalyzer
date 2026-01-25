@@ -12,26 +12,23 @@ st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
 # ================= TAB SIZE STYLING =================
 st.markdown("""
 <style>
-/* Increase tab font size */
-button[data-baseweb="tab"] {
-    font-size: 18px !important;
-    font-weight: 700 !important;
-    padding: 12px 20px !important;
+/* Remove top padding from main container */
+.block-container {
+    padding-top: 0.5rem !important;
 }
 
-/* Increase tab height */
-button[data-baseweb="tab"] > div {
-    padding: 12px 20px !important;
+/* Remove margin above tabs */
+div[data-testid="stTabs"] {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
 }
 
-/* Active tab underline thicker */
-button[data-baseweb="tab"][aria-selected="true"] {
-    border-bottom: 4px solid #1DA1F2 !important;
+/* Remove extra spacing above first element */
+section.main > div {
+    padding-top: 0 !important;
 }
 </style>
 """, unsafe_allow_html=True)
-
-
 
 # st.image("assets/logo2.png", use_container_width=True)
 
