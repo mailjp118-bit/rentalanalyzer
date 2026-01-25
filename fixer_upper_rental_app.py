@@ -281,7 +281,15 @@ Get **cash flow, cap rate, cash-on-cash return, deal score and much more** insta
         management_fee = st.number_input("Management Fee (%)", 0, 100, value=0, key="management_fee") / 100
 
         down_payment_pct = st.number_input("Down Payment (%)", 0, 100, value=0, key="down_payment_pct") / 100
-        interest_rate = st.number_input("Interest Rate (%)", 0, 15, value=0, key="interest_rate") / 100
+        #interest_rate = st.number_input("Interest Rate (%)", 0, 15, value=0, key="interest_rate") / 100
+        interest_rate = st.number_input(
+    "Interest Rate (%)",
+    min_value=0.0,
+    max_value=15.0,
+    value=0.0,
+    step=0.25,
+    format="%.2f"
+) / 100
         loan_term = st.number_input("Loan Term (Years)", 1, 40, value=30, key="loan_term")
 
         closing_cost_pct = st.number_input(
