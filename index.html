@@ -40,7 +40,6 @@
 
     .wrap{max-width:1100px; margin:0 auto; padding:20px 18px 70px;}
 
-    /* RESPONSIVE HEADER */
     .header {
       display: flex;
       justify-content: space-between;
@@ -74,12 +73,12 @@
       .brand span { font-size: 24px; }
     }
 
-    /* PANELS & GRID */
     .hero{
       display:grid;
       grid-template-columns: 1.25fr .75fr;
       gap:22px;
     }
+
     @media (max-width:900px){
       .hero{grid-template-columns:1fr;}
     }
@@ -122,6 +121,7 @@
       gap:14px;
       margin-top:24px;
     }
+
     @media (max-width:600px){
       .grid{grid-template-columns:1fr;}
     }
@@ -132,10 +132,11 @@
       border-radius:14px;
       padding:16px;
     }
+
     .card h3 { margin: 0 0 8px; font-size: 16px; }
     .card p { margin: 0; font-size: 14px; color: var(--muted); }
 
-    .side h2{margin:0 0 10px; font-size:18px;}
+    .side h2{margin:12px 0 8px; font-size:18px;}
     .list{padding-left:18px; color:var(--muted); line-height:1.8; font-size: 15px;}
 
     .footer{margin-top:40px; font-size:13px; color:rgba(255,255,255,.65); border-top: 1px solid var(--border); padding-top: 20px;}
@@ -176,8 +177,14 @@
           <a class="btn primary" href="https://rentdealanalyzer.streamlit.app/" target="_blank">
             Open Rental & Flip Calculator
           </a>
+
           <a class="btn primary" href="assets/RentalDealChecklist.xlsx" download>
             Download Rental Deal Checklist
+          </a>
+
+          <!-- ✅ NEW BUTTON (ONLY ADDITION) -->
+          <a class="btn primary" href="assets/FlipDealChecklist.xlsx" download>
+            Download Flip Deal Checklist
           </a>
         </div>
 
@@ -198,7 +205,6 @@
       </div>
 
       <div class="panel side">
-        <h2>What you can calculate</h2>
         <h2>Rental Calculator:</h2>
         <ul class="list">
           <li>Monthly & Annual Cash Flow</li>
@@ -206,12 +212,12 @@
           <li>Cap Rate</li>
           <li>Cash-on-Cash Return</li>
           <li>Equity Percentage</li>
-          <li>After Repair Value (ARV)</li>
           <li>Operating Expenses Breakdown</li>
           <li>Cash Required at Closing</li>
-          <li>Property Management Costs</li>
           <li>Rental Deal Score (0–100)</li>
-      <h2>Flip Calculator:</h2>
+        </ul>
+
+        <h2>Flip Calculator:</h2>
         <ul class="list">
           <li>Net Profit</li>
           <li>ROI</li>
@@ -223,29 +229,27 @@
       </div>
     </div>
 
-<div id="how-it-works" class="panel" style="margin-top:32px;">
+    <div id="how-it-works" class="panel" style="margin-top:32px;">
       <h2>How The Tool Works</h2>
       <ul class="list">
-        <li>🟦 <strong>Open the Calculator:</strong> Click the primary action button.</li>
-        <li>🟦 <strong>Choose the right calculator on the top:</strong> 🏠 Rental Calculator", "🔨 Flip Calculator.</li>
-        <li>✍️ <strong>Fill Deal Inputs:</strong> Enter purchase price, rent, and expenses.</li>
-        <li>⚙️ <strong>View Mode:</strong> Switch between annual & monthly view.</li>
-        <li>📊 <strong>Analyze Deal:</strong> View instant performance metrics.</li>
-        <li>📥 <strong>Download:</strong> Save your work as an Excel or PDF file.</li>
+        <li>🟦 Open the calculator</li>
+        <li>🏠 Choose Rental or 🔨 Flip calculator</li>
+        <li>✍️ Fill deal inputs</li>
+        <li>📊 View results instantly</li>
+        <li>📥 Download Excel or PDF</li>
       </ul>
     </div>
 
     <div id="faq" class="panel" style="margin-top:32px;">
       <h2>Frequently Asked Questions</h2>
-      <p class="sub"><strong>Is the Rental Deal Analyzer free?</strong><br>Yes, it is 100% free for educational use.</p>
-      <p class="sub"><strong>Do you store my property data?</strong><br>No, all calculations happen in your session.</p>
-    </p>
+      <p class="sub"><strong>Is the Rental Deal Analyzer free?</strong><br>Yes.</p>
+      <p class="sub"><strong>Do you store my data?</strong><br>No.</p>
     </div>
 
     <div class="footer">
       © <span id="y"></span> RentalDealAnalyzer.com
       <div class="tiny">
-        Educational purposes only. This tool does not constitute financial, investment, legal, tax, or real estate advice. All outputs are estimates, and use of this tool is at your own risk.
+        Educational purposes only. Tool does not constitute financial, investment, legal, tax, or real estate advice.
       </div>
     </div>
 
