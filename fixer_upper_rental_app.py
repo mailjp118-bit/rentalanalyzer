@@ -9,6 +9,27 @@ import streamlit.components.v1 as components
 
 # ================= PAGE CONFIG (MUST BE FIRST STREAMLIT CALL) =================
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
+# ================= TAB SIZE STYLING =================
+st.markdown(
+    """
+    <style>
+    /* Increase tab height and font size */
+    div[data-baseweb="tab"] > button {
+        font-size: 18px !important;     /* text size */
+        font-weight: 700 !important;    /* bold */
+        padding: 12px 24px !important;  /* height & width */
+        min-height: 55px !important;    /* tab height */
+    }
+
+    /* Optional: spacing between tabs */
+    div[data-baseweb="tab-list"] {
+        gap: 8px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # st.image("assets/logo2.png", use_container_width=True)
 
 # ================= GOOGLE ANALYTICS =================
