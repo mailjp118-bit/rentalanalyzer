@@ -632,7 +632,7 @@ if analyze_flip:
             st.write(f"Selling Costs: ${r['Selling Costs']:,.0f}")
             st.markdown("---")
             st.write(f"**Total Project Cost:** ${r['Total Project Cost']:,.0f}")
-            st.write(f"**ARV:** ${r['ARV']:,.0f}")
+            st.write(f"**ARV:** ${r['After Repair Value (ARV)']:,.0f}")
 
     # ================= FLIP DOWNLOAD BUTTONS (MATCH RENTAL STYLE) =================
     if "flip_results" in st.session_state:
