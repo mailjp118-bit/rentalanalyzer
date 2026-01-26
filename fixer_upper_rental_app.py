@@ -6,6 +6,9 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 import streamlit.components.v1 as components
+if "flip_analyzed" not in st.session_state:
+    st.session_state.flip_analyzed = False
+
 
 # ================= PAGE CONFIG (MUST BE FIRST STREAMLIT CALL) =================
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
@@ -520,11 +523,12 @@ Get **profit, ROI, annualized ROI, selling costs, and flip score** instantly.
             key="flip_selling_cost_pct"
         ) / 100
 
-        analyze_flip = st.button("📊 Analyze Flip", key="analyze_flip")
+        if st.button("📊 Analyze Flip", key="analyze_flip"):
+    st.session_state.flip_analyzed = True
 
 # ================= FLIP CALCULATIONS (ENHANCED) =================
     # ================= FLIP CALCULATIONS (CLEAN & SAFE) =================
-if analyze_flip:
+if st.session_state.flip_analyzed:
 
     # 1️⃣ Buying & Selling Costs
     buying_costs = flip_purchase_price * 0.025  # estimated title/escrow/origination
