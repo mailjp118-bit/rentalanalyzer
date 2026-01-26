@@ -524,7 +524,8 @@ Get **profit, ROI, annualized ROI, selling costs, and flip score** instantly.
         ) / 100
 
         if st.button("📊 Analyze Flip", key="analyze_flip"):
-    st.session_state.flip_analyzed = True
+            st.session_state.flip_analyzed = True
+
 
 # ================= FLIP CALCULATIONS (ENHANCED) =================
     # ================= FLIP CALCULATIONS (CLEAN & SAFE) =================
