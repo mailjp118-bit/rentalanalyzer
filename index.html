@@ -25,8 +25,6 @@
       --muted:#b9c3ff;
       --accent:#1DA1F2;
       --border:rgba(255,255,255,.10);
-      --green:#2E7D32;
-      --green-hover:#256628;
     }
 
     *{box-sizing:border-box}
@@ -97,13 +95,7 @@
     h1{margin:0 0 10px; font-size:38px; line-height:1.2;}
     .sub{margin:0 0 18px; color:var(--muted); font-size:16px; line-height:1.6;}
 
-    .ctaRow{
-      display:flex;
-      flex-direction:column;
-      align-items:flex-start;
-      gap:12px;
-      margin-top:18px;
-    }
+    .ctaRow{display:flex; gap:12px; flex-wrap:wrap; margin-top:18px;}
 
     .btn{
       padding:10px 16px;
@@ -114,33 +106,14 @@
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      font-size:14px;
-      transition: all 0.2s;
-      min-width:260px;
+      font-size: 14px;
+      transition: background 0.2s;
     }
-
     .btn:hover { background: rgba(255,255,255,0.05); }
 
-    .primary{
-      background:var(--accent);
-      color:white;
-      border-color:transparent;
-    }
-
-    .primary:hover { background:#1991db; }
-
-    /* ✅ BIG GREEN PRIMARY BUTTON */
-    .primary-big{
-      background:var(--green);
-      color:white;
-      font-size:16px;
-      padding:14px 20px;
-      font-weight:800;
-    }
-
-    .primary-big:hover{
-      background:var(--green-hover);
-    }
+    .primary{background:var(--accent); color:white; border-color:transparent;}
+    .primary:hover { background: #1991db; }
+    .ghost{background:transparent; color:var(--text);}
 
     .grid{
       display:grid;
@@ -166,20 +139,8 @@
     .side h2{margin:12px 0 8px; font-size:18px;}
     .list{padding-left:18px; color:var(--muted); line-height:1.8; font-size: 15px;}
 
-    .footer{
-      margin-top:40px;
-      font-size:13px;
-      color:rgba(255,255,255,.65);
-      border-top:1px solid var(--border);
-      padding-top:20px;
-    }
-
-    .tiny{
-      font-size:12px;
-      color:rgba(255,255,255,.45);
-      margin-top:10px;
-      line-height:1.5;
-    }
+    .footer{margin-top:40px; font-size:13px; color:rgba(255,255,255,.65); border-top: 1px solid var(--border); padding-top: 20px;}
+    .tiny{font-size:12px; color:rgba(255,255,255,.45); margin-top:10px; line-height: 1.5;}
   </style>
 </head>
 
@@ -189,7 +150,7 @@
     <header class="header">
       <div class="brand">
         <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8 30L32 10L56 30V54H38V40H26V54H8V30Z"
+          <path d="M8 30L32 10L56 30V54H38V40H26V54H8V30Z" 
                 fill="rgba(29,161,242,0.25)" stroke="#EAF0FF" stroke-width="2"/>
           <rect x="22" y="34" width="5" height="10" fill="#1DA1F2"/>
           <rect x="30" y="30" width="5" height="14" fill="#1DA1F2"/>
@@ -212,25 +173,30 @@
           Analyze rental and flip properties with a simple calculator and great confidence.
         </p>
 
-        <div class="ctaRow">
-          <a class="btn primary-big"
-             href="https://rentdealanalyzer.streamlit.app/"
-             target="_blank">
-            Open Rental & Flip Calculator
-          </a>
+<div class="ctaRow" style="flex-direction:column; align-items:flex-start; gap:12px;">
+  
+  <a class="btn primary" 
+     href="https://rentdealanalyzer.streamlit.app/" 
+     target="_blank"
+     style="min-width:260px;">
+    Open Rental & Flip Calculator
+  </a>
 
-          <a class="btn primary"
-             href="assets/RentalDealChecklist.xlsx"
-             download>
-            Download Rental Deal Checklist
-          </a>
+  <a class="btn primary" 
+     href="assets/RentalDealChecklist.xlsx" 
+     download
+     style="min-width:260px;">
+    Download Rental Deal Checklist
+  </a>
 
-          <a class="btn primary"
-             href="assets/FlipDealChecklist.xlsx"
-             download>
-            Download Flip Deal Checklist
-          </a>
-        </div>
+  <a class="btn primary" 
+     href="assets/FlipDealChecklist.xlsx" 
+     download
+     style="min-width:260px;">
+    Download Flip Deal Checklist
+  </a>
+
+</div>
 
         <div class="grid">
           <div class="card">
@@ -271,6 +237,23 @@
           <li>Cost Breakdown</li>
         </ul>
       </div>
+    </div>
+
+    <div id="how-it-works" class="panel" style="margin-top:32px;">
+      <h2>How The Tool Works</h2>
+      <ul class="list">
+        <li>🟦 Open the calculator</li>
+        <li>🏠 Choose Rental or 🔨 Flip calculator</li>
+        <li>✍️ Fill deal inputs</li>
+        <li>📊 View results instantly</li>
+        <li>📥 Download Excel or PDF</li>
+      </ul>
+    </div>
+
+    <div id="faq" class="panel" style="margin-top:32px;">
+      <h2>Frequently Asked Questions</h2>
+      <p class="sub"><strong>Is the Rental Deal Analyzer free?</strong><br>Yes.</p>
+      <p class="sub"><strong>Do you store my data?</strong><br>No.</p>
     </div>
 
     <div class="footer">
