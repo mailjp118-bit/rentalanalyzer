@@ -523,75 +523,87 @@ Get **profit, ROI, annualized ROI, selling costs, and flip score** instantly.
         analyze_flip = st.button("📊 Analyze Flip", key="analyze_flip")
 
 # ================= FLIP CALCULATIONS (ENHANCED) =================
-    if analyze_flip:
-        # 1. Acquisition & Sale Costs
-        buying_costs = flip_purchase_price * 0.025  # Estimated 2.5% for title/escrow/origination
-        selling_costs = flip_arv * flip_selling_cost_pct
-        
-        # 2. Monthly Carrying Costs
-        # Aggregating taxes, insurance, and utilities (est. 0.5% of ARV annually + utilities)
-        est_monthly_hold = ((flip_arv * 0.015) / 12) + 250 
-        total_holding_costs = est_monthly_hold * flip_holding_months
+    # ================= FLIP CALCULATIONS (CLEAN & SAFE) =================
+if analyze_flip:
 
-        # 3. Total Financial Outlay
-        total_project_cost = (
-            flip_purchase_price
-            + rehab_cost
-            + buying_costs
-            + flip_financing_costs
-            + flip_misc_costs
-            + selling_costs
-            + total_holding_costs
-        )
+    # 1️⃣ Buying & Selling Costs
+    buying_costs = flip_purchase_price * 0.025  # estimated title/escrow/origination
+    selling_costs = flip_arv * flip_selling_cost_pct
 
-        # 4. Profitability Metrics
-        net_profit = flip_arv - total_project_cost
-        roi = net_profit / total_project_cost if total_project_cost else 0
-        annualized_roi = (roi / flip_holding_months) * 12 if flip_holding_months else 0
-        profit_margin = net_profit / flip_arv if flip_arv else 0
+    # 2️⃣ Estimated Monthly Holding Costs
+    # Includes property tax, insurance, utilities (assumption-based)
+    estimated_monthly_holding = ((flip_arv * 0.015) / 12) + 250
+    total_holding_costs = estimated_monthly_holding * flip_holding_months
 
-        # 5. The 70% Rule (Maximum Allowable Offer)
-        mao_70_rule = (flip_arv * 0.70) - rehab_cost
+    # 3️⃣ Total Project Cost
+    total_project_cost = (
+        flip_purchase_price
+        + flip_rehab_cost
+        + buying_costs
+        + flip_financing_costs
+        + flip_misc_costs
+        + total_holding_costs
+        + selling_costs
+    )
 
-        # 6. Professional Deal Score (Weighted 0–100)
-        # Weighting: 40% ROI (target 20%), 30% Profit Margin (target 15%), 30% 70%-Rule Adherence
-        rule_adherence = (mao_70_rule / flip_purchase_price) if flip_purchase_price > 0 else 0
-        
-        flip_score_raw = (
-            (roi / 0.20 * 40) +
-            (profit_margin / 0.15 * 30) +
-            (min(1.0, rule_adherence) * 30)
-        )
-        
-        # Complexity Penalty: If rehab is > 50% of purchase price, subtract 5 points for risk
-        if rehab_cost > (flip_purchase_price * 0.5):
-            flip_score_raw -= 5
+    # 4️⃣ Profit & Returns
+    net_profit = flip_arv - total_project_cost
 
-        flip_score = max(0, min(100, flip_score_raw))
+    roi = net_profit / total_project_cost if total_project_cost else 0
+    annualized_roi = (roi / flip_holding_months) * 12 if flip_holding_months else 0
+    profit_margin = net_profit / flip_arv if flip_arv else 0
 
-        flip_rating = (
-            "🔥 Home Run Flip" if flip_score >= 85 else
-            "✅ Solid Flip" if flip_score >= 70 else
-            "⚠️ High Risk / Marginal" if flip_score >= 50 else
-            "❌ Avoid Deal"
-        )
+    # 5️⃣ 70% Rule – Maximum Allowable Offer
+    mao_70_rule = (flip_arv * 0.70) - flip_rehab_cost
 
-        st.session_state.flip_results = {
-            "Purchase Price": flip_purchase_price,
-            "Rehab Cost": rehab_cost,
-            "After Repair Value (ARV)": flip_arv,
-            "Max Allowable Offer (70% Rule)": mao_70_rule,
-            "Estimated Buying Costs": buying_costs,
-            "Total Holding Costs": total_holding_costs,
-            "Selling Costs": selling_costs,
-            "Net Profit": net_profit,
-            "ROI": roi,
-            "Annualized ROI": annualized_roi,
-            "Profit Margin": profit_margin,
-            "Flip Deal Score": flip_score,
-            "Rating": flip_rating,
-            "Total Project Cost": total_project_cost
-        }
+    # 6️⃣ Flip Deal Score (0–100)
+    # Weighting:
+    # 40% ROI (target 20%)
+    # 30% Profit Margin (target 15%)
+    # 30% 70% Rule Compliance
+
+    rule_adherence = mao_70_rule / flip_purchase_price if flip_purchase_price else 0
+
+    flip_score_raw = (
+        (roi / 0.20 * 40) +
+        (profit_margin / 0.15 * 30) +
+        (min(1.0, rule_adherence) * 30)
+    )
+
+    # Risk penalty for heavy rehab
+    if flip_rehab_cost > (flip_purchase_price * 0.5):
+        flip_score_raw -= 5
+
+    flip_score = max(0, min(100, flip_score_raw))
+
+    flip_rating = (
+        "🔥 Home Run Flip" if flip_score >= 85 else
+        "✅ Solid Flip" if flip_score >= 70 else
+        "⚠️ High Risk / Marginal" if flip_score >= 50 else
+        "❌ Avoid Deal"
+    )
+
+    # 7️⃣ Store Results (EXPORT-SAFE)
+    st.session_state.flip_results = {
+        "Purchase Price": flip_purchase_price,
+        "Rehab Cost": flip_rehab_cost,
+        "After Repair Value (ARV)": flip_arv,
+        "Holding Period (Months)": flip_holding_months,
+        "Estimated Buying Costs": buying_costs,
+        "Total Holding Costs": total_holding_costs,
+        "Financing Costs": flip_financing_costs,
+        "Misc / Contingency": flip_misc_costs,
+        "Selling Costs": selling_costs,
+        "Total Project Cost": total_project_cost,
+        "Net Profit": net_profit,
+        "ROI": roi,
+        "Annualized ROI": annualized_roi,
+        "Profit Margin": profit_margin,
+        "Max Allowable Offer (70% Rule)": mao_70_rule,
+        "Flip Deal Score": flip_score,
+        "Rating": flip_rating
+    }
+
     # ================= MIDDLE COLUMN — FLIP RESULTS =================
     with fcol2:
         st.header("📈 Flip Results")
