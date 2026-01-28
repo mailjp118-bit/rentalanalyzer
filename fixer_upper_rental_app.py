@@ -628,7 +628,7 @@ Get **profit, ROI, annualized ROI, break-even price, and total project cost** in
 
     # ================= MIDDLE COLUMN — FLIP RESULTS (DO NOT DISAPPEAR) =================
 # ================= MIDDLE COLUMN — FLIP RESULTS =================
- with fcol2:
+with fcol2:
     st.header("📈 Flip Results")
 
     if "flip_results" in st.session_state:
