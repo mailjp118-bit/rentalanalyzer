@@ -634,43 +634,57 @@ with fcol2:
     if "flip_results" in st.session_state:
         r = st.session_state.flip_results
 
+        def pick(*keys, default=0):
+            for k in keys:
+                if k in r:
+                    return r[k]
+            return default
+
+        net_profit = pick("Net Profit", default=0)
+        roi = pick("ROI", default=0)
+        annualized_roi = pick("Annualized ROI", "Annualized ROI %", default=0)
+        profit_margin = pick("Profit Margin", "Profit Margin %", "Profit margin", default=0)
+        flip_score = pick("Flip Deal Score", "Deal Score", default=0)
+        rating = pick("Rating", default="")
+
         st.metric(
             "Net Profit",
-            f"${r['Net Profit']:,.0f}",
+            f"${net_profit:,.0f}",
             help="Final profit after all purchase, rehab, holding, and selling costs."
         )
 
         st.metric(
             "ROI",
-            f"{r['ROI']:.2%}",
+            f"{roi:.2%}",
             help="Return on Investment: profit divided by total project cost."
         )
 
         st.metric(
             "Annualized ROI",
-            f"{r['Annualized ROI']:.2%}",
+            f"{annualized_roi:.2%}",
             help="ROI adjusted to a 12-month holding period."
         )
 
         st.metric(
             "Profit Margin",
-            f"{r['Profit Margin']:.2%}",
+            f"{profit_margin:.2%}",
             help="Profit as a percentage of the sale price (ARV)."
         )
 
         st.metric(
             "Flip Deal Score",
-            f"{r['Flip Deal Score']:.0f}/100",
+            f"{flip_score:.0f}/100",
             help="Overall flip quality score based on ROI, margin, and risk factors."
         )
 
-        st.subheader(
-            r["Rating"],
+        st.metric(
+            "Rating",
+            rating,
             help="Quick qualitative assessment of flip risk and return."
         )
+
     else:
         st.info("Enter inputs and click **Analyze Flip**")
-
 
     # ================= RIGHT COLUMN — COST BREAKDOWN (DO NOT DISAPPEAR) =================
     with fcol3:
