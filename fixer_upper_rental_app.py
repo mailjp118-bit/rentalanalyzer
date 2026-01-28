@@ -450,9 +450,6 @@ Get **cash flow, cap rate, cash-on-cash return, deal score and much more** insta
 # =====================================================================
 # ============================ FLIP TAB ================================
 # =====================================================================
-import streamlit as st
-import pandas as pd
-import datetime
 
 # 1. Page Configuration
 st.set_page_config(
