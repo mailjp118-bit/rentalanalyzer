@@ -52,7 +52,7 @@ def _is_money_field(key: str) -> bool:
         "rent", "noi", "cash flow", "debt", "down payment", "closing", "total",
         "expense", "tax", "insurance", "maintenance", "rehab", "loan", "investment",
         "price", "arv", "profit", "cost", "fees", "utilities", "hoa", "staging",
-        "concessions", "permit", "points", "origination", "holding"
+        "concessions", "permit", "points", "origination", "holding", "mao"
     ])
 
 def _fmt_value(key, val):
@@ -475,7 +475,6 @@ Get **profit, ROI, annualized ROI, break-even price, and total project cost** in
         st.subheader("Acquisition & Purchase")
         flip_purchase_price = st.number_input("Purchase Price ($)", min_value=0, step=1000, value=0, key="flip_purchase_price")
 
-        # Buying Closing Costs: $ and/or %
         flip_buy_close_pct = st.number_input("Buying Closing Costs (% of Purchase Price)", min_value=0.0, max_value=15.0, value=2.50, step=0.25, format="%.2f", key="flip_buy_close_pct") / 100
         flip_buy_close_fixed = st.number_input("Buying Closing Costs ($)", min_value=0, step=100, value=0, key="flip_buy_close_fixed")
 
@@ -497,7 +496,6 @@ Get **profit, ROI, annualized ROI, break-even price, and total project cost** in
         flip_down_payment_pct = st.number_input("Down Payment (%)", min_value=0.0, max_value=100.0, value=20.0, step=1.0, format="%.1f", key="flip_down_payment_pct") / 100
         flip_interest_rate = st.number_input("Interest Rate (Annual %)", min_value=0.0, max_value=25.0, value=12.0, step=0.25, format="%.2f", key="flip_interest_rate") / 100
 
-        # Points: $ and/or %
         flip_points_pct = st.number_input("Loan Points / Origination Fees (% of Loan)", min_value=0.0, max_value=10.0, value=2.0, step=0.25, format="%.2f", key="flip_points_pct") / 100
         flip_points_fixed = st.number_input("Loan Points / Origination Fees ($)", min_value=0, step=100, value=0, key="flip_points_fixed")
 
@@ -513,29 +511,23 @@ Get **profit, ROI, annualized ROI, break-even price, and total project cost** in
 
     # ================= FLIP CALCULATIONS (SAFE + COMPLETE) =================
     if analyze_flip:
-        # 1) Acquisition costs
         buying_closing_costs = (flip_purchase_price * flip_buy_close_pct) + flip_buy_close_fixed
         contingency_cost = flip_rehab_budget * flip_contingency_pct
 
-        # 2) Carrying costs
         monthly_carry = flip_tax_mo + flip_ins_mo + flip_utils_mo + flip_hoa_mo + flip_yard_pool_mo
         total_carry = monthly_carry * flip_holding_months
 
-        # 3) Financing
         down_payment_amt = flip_purchase_price * flip_down_payment_pct
         loan_amount = max(0.0, flip_purchase_price - down_payment_amt)
 
-        # Many flip loans are interest-only → model interest-only carrying cost
         monthly_interest_payment = loan_amount * (flip_interest_rate / 12) if loan_amount > 0 else 0.0
         total_interest_paid = monthly_interest_payment * flip_holding_months
 
         points_cost = (loan_amount * flip_points_pct) + flip_points_fixed
 
-        # 4) Selling costs (percent + fixed)
         selling_commission = flip_arv * flip_sell_cost_pct
         selling_fixed = flip_seller_concessions + flip_staging_photo
 
-        # 5) Total project cost
         total_project_cost = (
             flip_purchase_price
             + buying_closing_costs
@@ -550,29 +542,42 @@ Get **profit, ROI, annualized ROI, break-even price, and total project cost** in
             + selling_fixed
         )
 
-        # 6) Profit
         net_profit = flip_arv - total_project_cost
 
-        # Cash invested = total project cost minus borrowed principal (loan_amount)
         cash_invested = total_project_cost - loan_amount
         roi = (net_profit / cash_invested) if cash_invested else 0.0
 
-        # Annualized ROI (compounded) – safe guards
         if flip_holding_months and roi > -1:
             annualized_roi = (1 + roi) ** (12 / flip_holding_months) - 1
         else:
             annualized_roi = 0.0
 
-        # 7) Break-even sale price (commission depends on sale price)
-        # Break-even S such that S - base_costs - (commission_pct*S) = 0
-        # base_costs excludes commission computed on ARV and replaces with commission_pct*S
         base_costs = total_project_cost - selling_commission
-        if flip_sell_cost_pct < 1:
-            break_even_sale_price = base_costs / (1 - flip_sell_cost_pct)
-        else:
-            break_even_sale_price = 0.0
+        break_even_sale_price = (base_costs / (1 - flip_sell_cost_pct)) if flip_sell_cost_pct < 1 else 0.0
 
-        # Store results + analyzed flag
+        profit_margin = (net_profit / flip_arv) if flip_arv else 0.0
+
+        mao_70_rule = (flip_arv * 0.70) - flip_rehab_budget
+
+        rule_adherence = mao_70_rule / flip_purchase_price if flip_purchase_price else 0.0
+        flip_score_raw = (
+            (roi / 0.20 * 40) +
+            (profit_margin / 0.15 * 30) +
+            (min(1.0, max(0.0, rule_adherence)) * 30)
+        )
+
+        if flip_rehab_budget > (flip_purchase_price * 0.5):
+            flip_score_raw -= 5
+
+        flip_score = max(0.0, min(100.0, flip_score_raw))
+
+        flip_rating = (
+            "🔥 Home Run Flip" if flip_score >= 85 else
+            "✅ Solid Flip" if flip_score >= 70 else
+            "⚠️ High Risk / Marginal" if flip_score >= 50 else
+            "❌ Avoid Deal"
+        )
+
         st.session_state.flip_analyzed = True
         st.session_state.flip_results = {
             "Purchase Price": flip_purchase_price,
@@ -598,8 +603,12 @@ Get **profit, ROI, annualized ROI, break-even price, and total project cost** in
             "Net Profit": net_profit,
             "ROI": roi,
             "Annualized ROI": annualized_roi,
+            "Profit Margin": profit_margin,
+            "Max Allowable Offer (70% Rule)": mao_70_rule,
             "Break-Even Sale Price": break_even_sale_price,
             "Holding Period (Months)": flip_holding_months,
+            "Flip Deal Score": flip_score,
+            "Rating": flip_rating,
         }
 
         st.session_state.flip_breakdown = {
@@ -627,64 +636,62 @@ Get **profit, ROI, annualized ROI, break-even price, and total project cost** in
         }
 
     # ================= MIDDLE COLUMN — FLIP RESULTS (DO NOT DISAPPEAR) =================
-# ================= MIDDLE COLUMN — FLIP RESULTS =================
-with fcol2:
-    st.header("📈 Flip Results")
+    with fcol2:
+        st.header("📈 Flip Results")
 
-    if "flip_results" in st.session_state:
-        r = st.session_state.flip_results
+        if "flip_results" in st.session_state:
+            r = st.session_state.flip_results
 
-        def pick(*keys, default=0):
-            for k in keys:
-                if k in r:
-                    return r[k]
-            return default
+            def pick(*keys, default=0):
+                for k in keys:
+                    if k in r:
+                        return r[k]
+                return default
 
-        net_profit = pick("Net Profit", default=0)
-        roi = pick("ROI", default=0)
-        annualized_roi = pick("Annualized ROI", "Annualized ROI %", default=0)
-        profit_margin = pick("Profit Margin", "Profit Margin %", "Profit margin", default=0)
-        flip_score = pick("Flip Deal Score", "Deal Score", default=0)
-        rating = pick("Rating", default="")
+            net_profit = pick("Net Profit", default=0)
+            roi = pick("ROI", default=0)
+            annualized_roi = pick("Annualized ROI", default=0)
+            profit_margin = pick("Profit Margin", default=0)
+            flip_score = pick("Flip Deal Score", default=0)
+            rating = pick("Rating", default="")
 
-        st.metric(
-            "Net Profit",
-            f"${net_profit:,.0f}",
-            help="Final profit after all purchase, rehab, holding, and selling costs."
-        )
+            st.metric(
+                "Net Profit",
+                f"${net_profit:,.0f}",
+                help="Final profit after all purchase, rehab, holding, and selling costs."
+            )
 
-        st.metric(
-            "ROI",
-            f"{roi:.2%}",
-            help="Return on Investment: profit divided by total project cost."
-        )
+            st.metric(
+                "ROI",
+                f"{roi:.2%}",
+                help="Return on Investment: profit divided by cash invested."
+            )
 
-        st.metric(
-            "Annualized ROI",
-            f"{annualized_roi:.2%}",
-            help="ROI adjusted to a 12-month holding period."
-        )
+            st.metric(
+                "Annualized ROI",
+                f"{annualized_roi:.2%}",
+                help="ROI adjusted to a 12-month holding period."
+            )
 
-        st.metric(
-            "Profit Margin",
-            f"{profit_margin:.2%}",
-            help="Profit as a percentage of the sale price (ARV)."
-        )
+            st.metric(
+                "Profit Margin",
+                f"{profit_margin:.2%}",
+                help="Profit as a percentage of the sale price (ARV)."
+            )
 
-        st.metric(
-            "Flip Deal Score",
-            f"{flip_score:.0f}/100",
-            help="Overall flip quality score based on ROI, margin, and risk factors."
-        )
+            st.metric(
+                "Flip Deal Score",
+                f"{flip_score:.0f}/100",
+                help="Overall flip score based on ROI, margin, and 70% rule."
+            )
 
-        st.metric(
-            "Rating",
-            rating,
-            help="Quick qualitative assessment of flip risk and return."
-        )
-
-    else:
-        st.info("Enter inputs and click **Analyze Flip**")
+            st.metric(
+                "Rating",
+                rating,
+                help="Quick qualitative assessment of flip risk and return."
+            )
+        else:
+            st.info("Enter inputs and click **Analyze Flip**")
 
     # ================= RIGHT COLUMN — COST BREAKDOWN (DO NOT DISAPPEAR) =================
     with fcol3:
