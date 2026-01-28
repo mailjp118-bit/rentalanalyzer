@@ -627,18 +627,50 @@ Get **profit, ROI, annualized ROI, break-even price, and total project cost** in
         }
 
     # ================= MIDDLE COLUMN — FLIP RESULTS (DO NOT DISAPPEAR) =================
-    with fcol2:
-        st.header("📈 Flip Results")
+# ================= MIDDLE COLUMN — FLIP RESULTS =================
+ with fcol2:
+    st.header("📈 Flip Results")
 
-        if st.session_state.get("flip_analyzed") and "flip_results" in st.session_state:
-            r = st.session_state.flip_results
-            st.metric("Total Project Cost", f"${r['Total Project Cost']:,.0f}")
-            st.metric("Net Profit", f"${r['Net Profit']:,.0f}")
-            st.metric("ROI", f"{r['ROI']:.2%}")
-            st.metric("Annualized ROI", f"{r['Annualized ROI']:.2%}")
-            st.metric("Break-Even Sale Price", f"${r['Break-Even Sale Price']:,.0f}")
-        else:
-            st.info("Enter inputs and click **Analyze Flip**")
+    if "flip_results" in st.session_state:
+        r = st.session_state.flip_results
+
+        st.metric(
+            "Net Profit",
+            f"${r['Net Profit']:,.0f}",
+            help="Final profit after all purchase, rehab, holding, and selling costs."
+        )
+
+        st.metric(
+            "ROI",
+            f"{r['ROI']:.2%}",
+            help="Return on Investment: profit divided by total project cost."
+        )
+
+        st.metric(
+            "Annualized ROI",
+            f"{r['Annualized ROI']:.2%}",
+            help="ROI adjusted to a 12-month holding period."
+        )
+
+        st.metric(
+            "Profit Margin",
+            f"{r['Profit Margin']:.2%}",
+            help="Profit as a percentage of the sale price (ARV)."
+        )
+
+        st.metric(
+            "Flip Deal Score",
+            f"{r['Flip Deal Score']:.0f}/100",
+            help="Overall flip quality score based on ROI, margin, and risk factors."
+        )
+
+        st.subheader(
+            r["Rating"],
+            help="Quick qualitative assessment of flip risk and return."
+        )
+    else:
+        st.info("Enter inputs and click **Analyze Flip**")
+
 
     # ================= RIGHT COLUMN — COST BREAKDOWN (DO NOT DISAPPEAR) =================
     with fcol3:
