@@ -5,34 +5,18 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 import streamlit.components.v1 as components
-if "flip_analyzed" not in st.session_state:
-    st.session_state.flip_analyzed = False
-
 
 # ================= PAGE CONFIG (MUST BE FIRST STREAMLIT CALL) =================
 st.set_page_config(page_title="Fixer-Upper Rental Analyzer", layout="wide")
-# ================= TAB SIZE STYLING =================
+
+# ================= TAB/TOP SPACING (KEEP YOUR STYLE) =================
 st.markdown("""
 <style>
-/* Remove top padding from main container */
-.block-container {
-    padding-top: 2rem !important;
-}
-
-/* Remove margin above tabs */
-div[data-testid="stTabs"] {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-}
-
-/* Remove extra spacing above first element */
-section.main > div {
-    padding-top: 0 !important;
-}
+.block-container { padding-top: 2rem !important; }
+div[data-testid="stTabs"] { margin-top: 0 !important; padding-top: 0 !important; }
+section.main > div { padding-top: 0 !important; }
 </style>
 """, unsafe_allow_html=True)
-
-# st.image("assets/logo2.png", use_container_width=True)
 
 # ================= GOOGLE ANALYTICS =================
 components.html(
@@ -58,7 +42,8 @@ def _is_percent_field(key: str) -> bool:
     k = str(key).lower()
     return any(x in k for x in [
         "cap rate", "coc", "cash-on-cash", "equity", "vacancy", "management fee",
-        "down payment", "cash % arv", "interest rate", "roi", "margin", "%"
+        "down payment", "cash % arv", "interest rate", "roi", "margin", "%", "commission",
+        "annualized"
     ])
 
 def _is_money_field(key: str) -> bool:
@@ -66,19 +51,16 @@ def _is_money_field(key: str) -> bool:
     return any(x in k for x in [
         "rent", "noi", "cash flow", "debt", "down payment", "closing", "total",
         "expense", "tax", "insurance", "maintenance", "rehab", "loan", "investment",
-        "price", "arv", "profit", "cost"
+        "price", "arv", "profit", "cost", "fees", "utilities", "hoa", "staging",
+        "concessions", "permit", "points", "origination", "holding"
     ])
 
 def _fmt_value(key, val):
-    # Keep strings as-is (e.g., Rating)
     if isinstance(val, str):
         return val
-
-    # Dicts handled elsewhere
     if isinstance(val, dict):
         return ""
 
-    # Numbers formatting
     try:
         num = float(val)
     except Exception:
@@ -94,7 +76,7 @@ def _build_export_rows(results: dict):
     rows = []
     for k, v in results.items():
         if isinstance(v, dict):
-            rows.append((str(k), ""))  # section label
+            rows.append((str(k), ""))
             for kk, vv in v.items():
                 rows.append((f"  - {kk}", _fmt_value(kk, vv)))
         else:
@@ -112,7 +94,6 @@ def export_excel_pdf(results_dict: dict, excel_placeholder, pdf_placeholder, exc
             export_df.to_excel(writer, index=False, sheet_name="Results", startrow=6)
             ws = writer.book["Results"]
 
-            # Title + tagline
             ws["A1"] = APP_TITLE
             ws["A2"] = APP_TAGLINE
             try:
@@ -121,14 +102,12 @@ def export_excel_pdf(results_dict: dict, excel_placeholder, pdf_placeholder, exc
             except Exception:
                 pass
 
-            # Merge title cells
             try:
                 ws.merge_cells("A1:D1")
                 ws.merge_cells("A2:D2")
             except Exception:
                 pass
 
-            # Insert logo
             try:
                 from openpyxl.drawing.image import Image as XLImage
                 logo = XLImage(LOGO_PATH)
@@ -138,14 +117,12 @@ def export_excel_pdf(results_dict: dict, excel_placeholder, pdf_placeholder, exc
             except Exception:
                 pass
 
-            # Column widths
             try:
-                ws.column_dimensions["A"].width = 30
-                ws.column_dimensions["B"].width = 22
+                ws.column_dimensions["A"].width = 34
+                ws.column_dimensions["B"].width = 24
             except Exception:
                 pass
     except Exception:
-        # fallback without styling if openpyxl isn't available
         export_df.to_excel(excel_buffer, index=False)
 
     excel_buffer.seek(0)
@@ -224,7 +201,6 @@ with tab_rental:
                 <rect x="30" y="30" width="5" height="14" fill="#1DA1F2"/>
                 <rect x="38" y="26" width="5" height="18" fill="#1DA1F2"/>
               </svg>
-
               <span style="font-size:30px; font-weight:800;">Rental Deal Analyzer</span>
             </div>
             """,
@@ -254,7 +230,6 @@ Get **cash flow, cap rate, cash-on-cash return, deal score and much more** insta
             unsafe_allow_html=True
         )
 
-    # ================= PRIVACY MESSAGE =================
     st.markdown(
         """
         🔒 **Privacy Notice:**  
@@ -262,10 +237,8 @@ Get **cash flow, cap rate, cash-on-cash return, deal score and much more** insta
         """
     )
 
-    # ================= MAIN LAYOUT =================
     col1, spacer1, col2, spacer2, col3 = st.columns([1.2, 0.15, 1, 0.15, 1])
 
-    # ================= LEFT COLUMN — DEAL INPUTS =================
     with col1:
         st.header("🔢 Deal Inputs")
 
@@ -283,15 +256,16 @@ Get **cash flow, cap rate, cash-on-cash return, deal score and much more** insta
         management_fee = st.number_input("Management Fee (%)", 0, 100, value=0, key="management_fee") / 100
 
         down_payment_pct = st.number_input("Down Payment (%)", 0, 100, value=0, key="down_payment_pct") / 100
-        #interest_rate = st.number_input("Interest Rate (%)", 0, 15, value=0, key="interest_rate") / 100
         interest_rate = st.number_input(
-    "Interest Rate (%)",
-    min_value=0.0,
-    max_value=15.0,
-    value=0.0,
-    step=0.25,
-    format="%.2f"
-) / 100
+            "Interest Rate (%)",
+            min_value=0.0,
+            max_value=15.0,
+            value=0.0,
+            step=0.25,
+            format="%.2f",
+            key="interest_rate_rental"
+        ) / 100
+
         loan_term = st.number_input("Loan Term (Years)", 1, 40, value=30, key="loan_term")
 
         closing_cost_pct = st.number_input(
@@ -304,7 +278,6 @@ Get **cash flow, cap rate, cash-on-cash return, deal score and much more** insta
 
         analyze = st.button("📊 Analyze Deal", key="analyze_rental")
 
-    # ================= CALCULATIONS =================
     if analyze:
         annual_rent = monthly_rent * 12
         vacancy_loss = annual_rent * vacancy_rate
@@ -325,12 +298,12 @@ Get **cash flow, cap rate, cash-on-cash return, deal score and much more** insta
         monthly_rate = interest_rate / 12
         total_payments = loan_term * 12
 
-        if interest_rate > 0:
+        if interest_rate > 0 and total_payments > 0:
             monthly_payment = loan_amount * (
                 monthly_rate * (1 + monthly_rate) ** total_payments
             ) / ((1 + monthly_rate) ** total_payments - 1)
         else:
-            monthly_payment = loan_amount / total_payments
+            monthly_payment = loan_amount / total_payments if total_payments else 0
 
         annual_debt = monthly_payment * 12
         cash_flow_annual = noi_annual - annual_debt
@@ -381,10 +354,8 @@ Get **cash flow, cap rate, cash-on-cash return, deal score and much more** insta
             "Cash % ARV": cash_pct_arv
         }
 
-    # ================= MIDDLE COLUMN — DEAL RESULTS =================
     with col2:
         st.header("📈 Deal Results")
-
         if "results" in st.session_state:
             r = st.session_state.results
 
@@ -405,10 +376,8 @@ Get **cash flow, cap rate, cash-on-cash return, deal score and much more** insta
             st.metric("Rental Deal Score", f"{r['Score']:.0f}/100", help="Overall deal strength score based on returns and equity.")
             st.subheader(r["Rating"])
 
-    # ================= RIGHT COLUMN — EXPENSES + CASH =================
     with col3:
         st.header("💸 Expense Breakdown")
-
         if "results" in st.session_state:
             r = st.session_state.results
 
@@ -422,14 +391,12 @@ Get **cash flow, cap rate, cash-on-cash return, deal score and much more** insta
                 st.write(f"**Total Expenses:** ${r['Total Expenses Annual']/12:,.0f}")
 
             st.subheader("💰 Cash Required at Closing")
-
             st.write(f"Down Payment: ${r['Down Payment']:,.0f}")
             st.write(f"Rehab Budget: ${rehab_cost:,.0f}")
             st.write(f"Closing Costs: ${r['Closing Costs']:,.0f}")
             st.write(f"**Total Cash Needed:** ${r['Total Cash Needed']:,.0f}")
             st.write(f"Cash Needed as % of ARV: {r['Cash % ARV']:.1%}")
 
-    # ================= DOWNLOAD BUTTONS (LOGO + TITLE + FORMATTED VALUES) =================
     if "results" in st.session_state:
         export_excel_pdf(
             st.session_state.results,
@@ -439,7 +406,6 @@ Get **cash flow, cap rate, cash-on-cash return, deal score and much more** insta
             pdf_filename="rental_deal_analysis.pdf"
         )
 
-    # ================= DISCLAIMER =================
     st.markdown("---")
     st.caption(
         "Disclaimer: This tool is for educational and informational purposes only and does not "
@@ -451,7 +417,7 @@ Get **cash flow, cap rate, cash-on-cash return, deal score and much more** insta
 # ============================ FLIP TAB ================================
 # =====================================================================
 with tab_flip:
-    # ================= TOP BAR (KEEP SAME BRANDING) =================
+    # ================= TOP BAR =================
     top_left_f, top_middle_f, top_right_f = st.columns([5, 2, 2])
 
     with top_left_f:
@@ -465,7 +431,6 @@ with tab_flip:
                 <rect x="30" y="30" width="5" height="14" fill="#1DA1F2"/>
                 <rect x="38" y="26" width="5" height="18" fill="#1DA1F2"/>
               </svg>
-
               <span style="font-size:30px; font-weight:800;">Fix & Flip Deal Analyzer</span>
             </div>
             """,
@@ -474,7 +439,7 @@ with tab_flip:
 
         st.markdown("""
 ### Know if a flip works — Fast & Free.  
-Get **profit, ROI, annualized ROI, selling costs, and flip score** instantly.
+Get **profit, ROI, annualized ROI, break-even price, and total project cost** instantly.
 """)
 
     with top_middle_f:
@@ -490,7 +455,6 @@ Get **profit, ROI, annualized ROI, selling costs, and flip score** instantly.
             unsafe_allow_html=True
         )
 
-    # ================= PRIVACY MESSAGE =================
     st.markdown(
         """
         🔒 **Privacy Notice:**  
@@ -498,157 +462,220 @@ Get **profit, ROI, annualized ROI, selling costs, and flip score** instantly.
         """
     )
 
-    # ================= MAIN LAYOUT =================
     fcol1, fsp1, fcol2, fsp2, fcol3 = st.columns([1.2, 0.15, 1, 0.15, 1])
 
-    # ================= LEFT COLUMN — FLIP INPUTS =================
+    # Ensure session flags exist
+    if "flip_analyzed" not in st.session_state:
+        st.session_state.flip_analyzed = False
+
+    # ================= LEFT COLUMN — FLIP INPUTS (ALL MISSING ADDED) =================
     with fcol1:
         st.header("🔢 Flip Inputs")
 
+        st.subheader("Acquisition & Purchase")
         flip_purchase_price = st.number_input("Purchase Price ($)", min_value=0, step=1000, value=0, key="flip_purchase_price")
-        flip_rehab_cost = st.number_input("Rehab Cost ($)", min_value=0, step=1000, value=0, key="flip_rehab_cost")
+
+        # Buying Closing Costs: $ and/or %
+        flip_buy_close_pct = st.number_input("Buying Closing Costs (% of Purchase Price)", min_value=0.0, max_value=15.0, value=2.50, step=0.25, format="%.2f", key="flip_buy_close_pct") / 100
+        flip_buy_close_fixed = st.number_input("Buying Closing Costs ($)", min_value=0, step=100, value=0, key="flip_buy_close_fixed")
+
+        flip_inspection_appraisal = st.number_input("Inspection & Appraisal Fees ($)", min_value=0, step=50, value=0, key="flip_inspection_appraisal")
+
+        st.subheader("Renovation & Rehab")
+        flip_rehab_budget = st.number_input("Estimated Rehab Budget ($)", min_value=0, step=1000, value=0, key="flip_rehab_budget")
+        flip_contingency_pct = st.number_input("Misc / Contingency (%)", min_value=0.0, max_value=30.0, value=10.0, step=1.0, format="%.1f", key="flip_contingency_pct") / 100
+        flip_permit_arch_fees = st.number_input("Permit & Architectural Fees ($)", min_value=0, step=100, value=0, key="flip_permit_arch_fees")
+
+        st.subheader("Carrying Costs (Monthly)")
+        flip_tax_mo = st.number_input("Property Taxes ($/month)", min_value=0, step=50, value=0, key="flip_tax_mo")
+        flip_ins_mo = st.number_input("Insurance ($/month)", min_value=0, step=50, value=0, key="flip_ins_mo")
+        flip_utils_mo = st.number_input("Utilities ($/month)", min_value=0, step=50, value=0, key="flip_utils_mo")
+        flip_hoa_mo = st.number_input("HOA Fees ($/month)", min_value=0, step=25, value=0, key="flip_hoa_mo")
+        flip_yard_pool_mo = st.number_input("Yard/Pool Maintenance ($/month)", min_value=0, step=25, value=0, key="flip_yard_pool_mo")
+
+        st.subheader("Financing (If using a loan)")
+        flip_down_payment_pct = st.number_input("Down Payment (%)", min_value=0.0, max_value=100.0, value=20.0, step=1.0, format="%.1f", key="flip_down_payment_pct") / 100
+        flip_interest_rate = st.number_input("Interest Rate (Annual %)", min_value=0.0, max_value=25.0, value=12.0, step=0.25, format="%.2f", key="flip_interest_rate") / 100
+
+        # Points: $ and/or %
+        flip_points_pct = st.number_input("Loan Points / Origination Fees (% of Loan)", min_value=0.0, max_value=10.0, value=2.0, step=0.25, format="%.2f", key="flip_points_pct") / 100
+        flip_points_fixed = st.number_input("Loan Points / Origination Fees ($)", min_value=0, step=100, value=0, key="flip_points_fixed")
+
+        flip_holding_months = st.number_input("Projected Holding Period (Months)", min_value=1, step=1, value=6, key="flip_holding_months")
+
+        st.subheader("Sale & Exit")
         flip_arv = st.number_input("After Repair Value (ARV) ($)", min_value=0, step=1000, value=0, key="flip_arv")
+        flip_sell_cost_pct = st.number_input("Selling Costs / Realtor Commission (% of Sale Price)", min_value=0.0, max_value=15.0, value=8.0, step=0.25, format="%.2f", key="flip_sell_cost_pct") / 100
+        flip_seller_concessions = st.number_input("Seller Concessions ($)", min_value=0, step=100, value=0, key="flip_seller_concessions")
+        flip_staging_photo = st.number_input("Staging & Photography ($)", min_value=0, step=100, value=0, key="flip_staging_photo")
 
-        flip_holding_months = st.number_input("Holding Period (Months)", min_value=1, step=1, value=6, key="flip_holding_months")
+        analyze_flip = st.button("📊 Analyze Flip", key="analyze_flip")
 
-        flip_financing_costs = st.number_input("Financing Costs ($)", min_value=0, step=100, value=0, key="flip_financing_costs")
-        flip_misc_costs = st.number_input("Misc / Contingency ($)", min_value=0, step=100, value=0, key="flip_misc_costs")
+    # ================= FLIP CALCULATIONS (SAFE + COMPLETE) =================
+    if analyze_flip:
+        # 1) Acquisition costs
+        buying_closing_costs = (flip_purchase_price * flip_buy_close_pct) + flip_buy_close_fixed
+        contingency_cost = flip_rehab_budget * flip_contingency_pct
 
-        flip_selling_cost_pct = st.number_input(
-            "Selling Costs (% of ARV)",
-            min_value=0,
-            max_value=15,
-            value=8,
-            key="flip_selling_cost_pct"
-        ) / 100
+        # 2) Carrying costs
+        monthly_carry = flip_tax_mo + flip_ins_mo + flip_utils_mo + flip_hoa_mo + flip_yard_pool_mo
+        total_carry = monthly_carry * flip_holding_months
 
-        if st.button("📊 Analyze Flip", key="analyze_flip"):
-            st.session_state.flip_analyzed = True
+        # 3) Financing
+        down_payment_amt = flip_purchase_price * flip_down_payment_pct
+        loan_amount = max(0.0, flip_purchase_price - down_payment_amt)
 
+        # Many flip loans are interest-only → model interest-only carrying cost
+        monthly_interest_payment = loan_amount * (flip_interest_rate / 12) if loan_amount > 0 else 0.0
+        total_interest_paid = monthly_interest_payment * flip_holding_months
 
-# ================= FLIP CALCULATIONS (ENHANCED) =================
-    # ================= FLIP CALCULATIONS (CLEAN & SAFE) =================
-if st.session_state.flip_analyzed:
+        points_cost = (loan_amount * flip_points_pct) + flip_points_fixed
 
-    # 1️⃣ Buying & Selling Costs
-    buying_costs = flip_purchase_price * 0.025  # estimated title/escrow/origination
-    selling_costs = flip_arv * flip_selling_cost_pct
+        # 4) Selling costs (percent + fixed)
+        selling_commission = flip_arv * flip_sell_cost_pct
+        selling_fixed = flip_seller_concessions + flip_staging_photo
 
-    # 2️⃣ Estimated Monthly Holding Costs
-    # Includes property tax, insurance, utilities (assumption-based)
-    estimated_monthly_holding = ((flip_arv * 0.015) / 12) + 250
-    total_holding_costs = estimated_monthly_holding * flip_holding_months
+        # 5) Total project cost
+        total_project_cost = (
+            flip_purchase_price
+            + buying_closing_costs
+            + flip_inspection_appraisal
+            + flip_rehab_budget
+            + contingency_cost
+            + flip_permit_arch_fees
+            + total_carry
+            + total_interest_paid
+            + points_cost
+            + selling_commission
+            + selling_fixed
+        )
 
-    # 3️⃣ Total Project Cost
-    total_project_cost = (
-        flip_purchase_price
-        + flip_rehab_cost
-        + buying_costs
-        + flip_financing_costs
-        + flip_misc_costs
-        + total_holding_costs
-        + selling_costs
-    )
+        # 6) Profit
+        net_profit = flip_arv - total_project_cost
 
-    # 4️⃣ Profit & Returns
-    net_profit = flip_arv - total_project_cost
+        # Cash invested = total project cost minus borrowed principal (loan_amount)
+        cash_invested = total_project_cost - loan_amount
+        roi = (net_profit / cash_invested) if cash_invested else 0.0
 
-    roi = net_profit / total_project_cost if total_project_cost else 0
-    annualized_roi = (roi / flip_holding_months) * 12 if flip_holding_months else 0
-    profit_margin = net_profit / flip_arv if flip_arv else 0
+        # Annualized ROI (compounded) – safe guards
+        if flip_holding_months and roi > -1:
+            annualized_roi = (1 + roi) ** (12 / flip_holding_months) - 1
+        else:
+            annualized_roi = 0.0
 
-    # 5️⃣ 70% Rule – Maximum Allowable Offer
-    mao_70_rule = (flip_arv * 0.70) - flip_rehab_cost
+        # 7) Break-even sale price (commission depends on sale price)
+        # Break-even S such that S - base_costs - (commission_pct*S) = 0
+        # base_costs excludes commission computed on ARV and replaces with commission_pct*S
+        base_costs = total_project_cost - selling_commission
+        if flip_sell_cost_pct < 1:
+            break_even_sale_price = base_costs / (1 - flip_sell_cost_pct)
+        else:
+            break_even_sale_price = 0.0
 
-    # 6️⃣ Flip Deal Score (0–100)
-    # Weighting:
-    # 40% ROI (target 20%)
-    # 30% Profit Margin (target 15%)
-    # 30% 70% Rule Compliance
+        # Store results + analyzed flag
+        st.session_state.flip_analyzed = True
+        st.session_state.flip_results = {
+            "Purchase Price": flip_purchase_price,
+            "Buying Closing Costs": buying_closing_costs,
+            "Inspection & Appraisal Fees": flip_inspection_appraisal,
+            "Estimated Rehab Budget": flip_rehab_budget,
+            "Contingency Cost": contingency_cost,
+            "Permit & Architectural Fees": flip_permit_arch_fees,
+            "Monthly Carrying Costs": monthly_carry,
+            "Total Carrying Costs": total_carry,
+            "Down Payment": down_payment_amt,
+            "Loan Amount": loan_amount,
+            "Interest Rate": flip_interest_rate,
+            "Monthly Interest Payment": monthly_interest_payment,
+            "Total Interest Paid": total_interest_paid,
+            "Loan Points / Origination Fees": points_cost,
+            "After Repair Value (ARV)": flip_arv,
+            "Selling Commission": selling_commission,
+            "Seller Concessions": flip_seller_concessions,
+            "Staging & Photography": flip_staging_photo,
+            "Total Project Cost": total_project_cost,
+            "Cash Invested": cash_invested,
+            "Net Profit": net_profit,
+            "ROI": roi,
+            "Annualized ROI": annualized_roi,
+            "Break-Even Sale Price": break_even_sale_price,
+            "Holding Period (Months)": flip_holding_months,
+        }
 
-    rule_adherence = mao_70_rule / flip_purchase_price if flip_purchase_price else 0
+        st.session_state.flip_breakdown = {
+            "Acquisition & Purchase": {
+                "Purchase Price": flip_purchase_price,
+                "Buying Closing Costs": buying_closing_costs,
+                "Inspection & Appraisal Fees": flip_inspection_appraisal,
+            },
+            "Renovation & Rehab": {
+                "Estimated Rehab Budget": flip_rehab_budget,
+                "Contingency Cost": contingency_cost,
+                "Permit & Architectural Fees": flip_permit_arch_fees,
+            },
+            "Carrying Costs": {
+                "Monthly Carrying Costs": monthly_carry,
+                "Total Carrying Costs": total_carry,
+                "Monthly Interest Payment": monthly_interest_payment,
+                "Total Interest Paid": total_interest_paid,
+            },
+            "Sale & Exit": {
+                "Selling Commission": selling_commission,
+                "Seller Concessions": flip_seller_concessions,
+                "Staging & Photography": flip_staging_photo,
+            }
+        }
 
-    flip_score_raw = (
-        (roi / 0.20 * 40) +
-        (profit_margin / 0.15 * 30) +
-        (min(1.0, rule_adherence) * 30)
-    )
-
-    # Risk penalty for heavy rehab
-    if flip_rehab_cost > (flip_purchase_price * 0.5):
-        flip_score_raw -= 5
-
-    flip_score = max(0, min(100, flip_score_raw))
-
-    flip_rating = (
-        "🔥 Home Run Flip" if flip_score >= 85 else
-        "✅ Solid Flip" if flip_score >= 70 else
-        "⚠️ High Risk / Marginal" if flip_score >= 50 else
-        "❌ Avoid Deal"
-    )
-
-    # 7️⃣ Store Results (EXPORT-SAFE)
-    st.session_state.flip_results = {
-        "Purchase Price": flip_purchase_price,
-        "Rehab Cost": flip_rehab_cost,
-        "After Repair Value (ARV)": flip_arv,
-        "Holding Period (Months)": flip_holding_months,
-        "Estimated Buying Costs": buying_costs,
-        "Total Holding Costs": total_holding_costs,
-        "Financing Costs": flip_financing_costs,
-        "Misc / Contingency": flip_misc_costs,
-        "Selling Costs": selling_costs,
-        "Total Project Cost": total_project_cost,
-        "Net Profit": net_profit,
-        "ROI": roi,
-        "Annualized ROI": annualized_roi,
-        "Profit Margin": profit_margin,
-        "Max Allowable Offer (70% Rule)": mao_70_rule,
-        "Flip Deal Score": flip_score,
-        "Rating": flip_rating
-    }
-
-    # ================= MIDDLE COLUMN — FLIP RESULTS =================
+    # ================= MIDDLE COLUMN — FLIP RESULTS (DO NOT DISAPPEAR) =================
     with fcol2:
         st.header("📈 Flip Results")
 
-        if "flip_results" in st.session_state:
+        if st.session_state.get("flip_analyzed") and "flip_results" in st.session_state:
             r = st.session_state.flip_results
+            st.metric("Total Project Cost", f"${r['Total Project Cost']:,.0f}")
             st.metric("Net Profit", f"${r['Net Profit']:,.0f}")
             st.metric("ROI", f"{r['ROI']:.2%}")
             st.metric("Annualized ROI", f"{r['Annualized ROI']:.2%}")
-            st.metric("Profit Margin", f"{r['Profit Margin']:.2%}")
-            st.metric("Flip Deal Score", f"{r['Flip Deal Score']:.0f}/100")
-            st.subheader(r["Rating"])
+            st.metric("Break-Even Sale Price", f"${r['Break-Even Sale Price']:,.0f}")
         else:
             st.info("Enter inputs and click **Analyze Flip**")
 
-    # ================= RIGHT COLUMN — COST BREAKDOWN =================
+    # ================= RIGHT COLUMN — COST BREAKDOWN (DO NOT DISAPPEAR) =================
     with fcol3:
         st.header("💸 Cost Breakdown")
 
-        if "flip_results" in st.session_state:
+        if st.session_state.get("flip_analyzed") and "flip_results" in st.session_state:
             r = st.session_state.flip_results
+
             st.write(f"Purchase Price: ${r['Purchase Price']:,.0f}")
-            st.write(f"Rehab Cost: ${r['Rehab Cost']:,.0f}")
-            st.write(f"Financing Costs: ${r['Financing Costs']:,.0f}")
-            st.write(f"Misc / Contingency: ${r['Misc / Contingency']:,.0f}")
-            st.write(f"Selling Costs: ${r['Selling Costs']:,.0f}")
+            st.write(f"Buying Closing Costs: ${r['Buying Closing Costs']:,.0f}")
+            st.write(f"Inspection & Appraisal: ${r['Inspection & Appraisal Fees']:,.0f}")
+            st.write(f"Rehab Budget: ${r['Estimated Rehab Budget']:,.0f}")
+            st.write(f"Contingency Cost: ${r['Contingency Cost']:,.0f}")
+            st.write(f"Permits/Architect: ${r['Permit & Architectural Fees']:,.0f}")
+            st.write(f"Total Carrying Costs: ${r['Total Carrying Costs']:,.0f}")
+            st.write(f"Total Interest Paid: ${r['Total Interest Paid']:,.0f}")
+            st.write(f"Loan Points/Fees: ${r['Loan Points / Origination Fees']:,.0f}")
+            st.write(f"Selling Commission: ${r['Selling Commission']:,.0f}")
+            st.write(f"Seller Concessions: ${r['Seller Concessions']:,.0f}")
+            st.write(f"Staging & Photo: ${r['Staging & Photography']:,.0f}")
             st.markdown("---")
             st.write(f"**Total Project Cost:** ${r['Total Project Cost']:,.0f}")
             st.write(f"**ARV:** ${r['After Repair Value (ARV)']:,.0f}")
 
-    # ================= FLIP DOWNLOAD BUTTONS (MATCH RENTAL STYLE) =================
-    if "flip_results" in st.session_state:
+    # ================= FLIP DOWNLOAD BUTTONS (SEPARATE + DO NOT RESET VIEW) =================
+    if st.session_state.get("flip_analyzed") and "flip_results" in st.session_state:
         export_excel_pdf(
-            st.session_state.flip_results,
+            {
+                **st.session_state.flip_results,
+                "Cost Breakdown": st.session_state.get("flip_breakdown", {})
+            },
             flip_excel_btn,
             flip_pdf_btn,
             excel_filename="flip_deal_analysis.xlsx",
             pdf_filename="flip_deal_analysis.pdf"
         )
 
-    # ================= DISCLAIMER =================
     st.markdown("---")
     st.caption(
         "Disclaimer: This tool is for educational and informational purposes only and does not "
