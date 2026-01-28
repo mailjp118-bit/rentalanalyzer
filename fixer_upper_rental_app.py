@@ -450,208 +450,186 @@ Get **cash flow, cap rate, cash-on-cash return, deal score and much more** insta
 # =====================================================================
 # ============================ FLIP TAB ================================
 # =====================================================================
-with tab_flip:
-    # ================= TOP BAR (KEEP SAME BRANDING) =================
-    top_left_f, top_middle_f, top_right_f = st.columns([5, 2, 2])
+import streamlit as st
+import pandas as pd
+import datetime
 
-    with top_left_f:
-        st.markdown(
-            """
-            <div style="display:flex; align-items:center; gap:14px; margin:8px 0 8px;">
-              <svg width="48" height="48" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 30L32 10L56 30V54H38V40H26V54H8V30Z"
-                      fill="rgba(29,161,242,0.25)" stroke="#EAF0FF" stroke-width="2"/>
-                <rect x="22" y="34" width="5" height="10" fill="#1DA1F2"/>
-                <rect x="30" y="30" width="5" height="14" fill="#1DA1F2"/>
-                <rect x="38" y="26" width="5" height="18" fill="#1DA1F2"/>
-              </svg>
+# 1. Page Configuration
+st.set_page_config(
+    page_title="Rental Deal Analyzer | Flip Calculator",
+    page_icon="🏠",
+    layout="wide"
+)
 
-              <span style="font-size:30px; font-weight:800;">Fix & Flip Deal Analyzer</span>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+# 2. CSS for Dark Mode & Branding
+st.markdown("""
+    <style>
+    .stApp { background-color: #0b1020; color: #eaf0ff; }
+    div[data-testid="stMetricValue"] { color: #1DA1F2; }
+    label { color: #b9c3ff !important; }
+    .stButton>button {
+        background-color: #1DA1F2;
+        color: white;
+        border-radius: 8px;
+        border: none;
+        width: 100%;
+    }
+    .stButton>button:hover { background-color: #1991db; }
+    </style>
+""", unsafe_allow_html=True)
 
-        st.markdown("""
-### Know if a flip works — Fast & Free.  
-Get **profit, ROI, annualized ROI, selling costs, and flip score** instantly.
-""")
+# ================= TOP BAR =================
+# Using [8, 1, 1] ratio to keep title/logo aligned left
+top_left, top_middle, top_right = st.columns([8, 1, 1])
 
-    with top_middle_f:
-        st.selectbox("📊 View Mode", ["Project"], index=0, key="flip_view_mode", disabled=True)
-
-    with top_right_f:
-        flip_excel_btn = st.empty()
-        flip_pdf_btn = st.empty()
-        st.markdown(
-            "<div style='font-size:14px; margin-top:4px;'>"
-            "📧 Email: <a href='mailto:email@rentaldealanalyzer.com'>"
-            "email@rentaldealanalyzer.com</a></div>",
-            unsafe_allow_html=True
-        )
-
-    # ================= PRIVACY MESSAGE =================
+with top_left:
     st.markdown(
         """
-        🔒 **Privacy Notice:**  
-        *We do not store or track your deal data. All calculations are performed in real-time and reset when you refresh the page.*
-        """
+        <div style="display:flex; align-items:center; gap:12px; margin:8px 0 8px;">
+          <svg width="48" height="48" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 30L32 10L56 30V54H38V40H26V54H8V30Z"
+                  fill="rgba(29,161,242,0.25)" stroke="#EAF0FF" stroke-width="2"/>
+            <rect x="22" y="34" width="5" height="10" fill="#1DA1F2"/>
+            <rect x="30" y="30" width="5" height="14" fill="#1DA1F2"/>
+            <rect x="38" y="26" width="5" height="18" fill="#1DA1F2"/>
+          </svg>
+          <span style="font-size:28px; font-weight:800; white-space:nowrap;">Rental Deal Analyzer</span>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
-    # ================= MAIN LAYOUT =================
-    fcol1, fsp1, fcol2, fsp2, fcol3 = st.columns([1.2, 0.15, 1, 0.15, 1])
+st.divider()
 
-    # ================= LEFT COLUMN — FLIP INPUTS =================
-    with fcol1:
-        st.header("🔢 Flip Inputs")
+# ================= INPUTS =================
+col1, col2, col3 = st.columns(3)
 
-        flip_purchase_price = st.number_input("Purchase Price ($)", min_value=0, step=1000, value=0, key="flip_purchase_price")
-        flip_rehab_cost = st.number_input("Rehab Cost ($)", min_value=0, step=1000, value=0, key="flip_rehab_cost")
-        flip_arv = st.number_input("After Repair Value (ARV) ($)", min_value=0, step=1000, value=0, key="flip_arv")
+with col1:
+    st.subheader("💰 Purchase & Rehab")
+    purchase_price = st.number_input("Purchase Price ($)", value=250000, step=1000)
+    buying_costs_pct = st.number_input("Buying Costs / Closing (%)", value=2.0, step=0.5, help="Title, Escrow, Recording fees (approx 1-3%)")
+    rehab_cost = st.number_input("Rehab Budget ($)", value=40000, step=1000)
+    contingency_pct = st.number_input("Rehab Contingency (%)", value=10.0, step=5.0, help="Buffer for over-budget repairs")
 
-        flip_holding_months = st.number_input("Holding Period (Months)", min_value=1, step=1, value=6, key="flip_holding_months")
+with col2:
+    st.subheader("🏦 Financing & Holding")
+    down_payment_pct = st.number_input("Down Payment (%)", value=20.0, step=5.0)
+    interest_rate = st.number_input("Interest Rate (%)", value=10.0, step=0.5)
+    loan_points = st.number_input("Loan Points (% of Loan)", value=2.0, step=0.5, help="Upfront points paid to hard money lender")
+    holding_period = st.number_input("Holding Period (Months)", value=6, step=1)
+    
+    # New Detailed Carry Costs
+    with st.expander("Monthly Carry Details"):
+        property_taxes = st.number_input("Property Taxes ($/mo)", value=300)
+        insurance = st.number_input("Insurance ($/mo)", value=150)
+        utilities = st.number_input("Utilities/HOA ($/mo)", value=250)
 
-        flip_financing_costs = st.number_input("Financing Costs ($)", min_value=0, step=100, value=0, key="flip_financing_costs")
-        flip_misc_costs = st.number_input("Misc / Contingency ($)", min_value=0, step=100, value=0, key="flip_misc_costs")
+with col3:
+    st.subheader("📈 Exit Strategy")
+    arv = st.number_input("After Repair Value (ARV) ($)", value=400000, step=1000)
+    selling_costs_pct = st.number_input("Selling Costs (% of ARV)", value=6.0, step=0.5, help="Agent commissions + closing costs")
 
-        flip_selling_cost_pct = st.number_input(
-            "Selling Costs (% of ARV)",
-            min_value=0,
-            max_value=15,
-            value=8,
-            key="flip_selling_cost_pct"
-        ) / 100
+# ================= CALCULATIONS =================
 
-        if st.button("📊 Analyze Flip", key="analyze_flip"):
-            st.session_state.flip_analyzed = True
+# 1. Acquisition
+buying_costs_amount = purchase_price * (buying_costs_pct / 100)
+loan_amount = purchase_price * (1 - (down_payment_pct / 100))
+down_payment_amount = purchase_price - loan_amount
+
+# 2. Rehab
+contingency_amount = rehab_cost * (contingency_pct / 100)
+total_rehab_budget = rehab_cost + contingency_amount
+
+# 3. Financing (The Cost of Money)
+points_amount = loan_amount * (loan_points / 100)
+monthly_interest = (loan_amount * (interest_rate / 100)) / 12
+total_interest_cost = monthly_interest * holding_period
+total_finance_cost = points_amount + total_interest_cost
+
+# 4. Holding (The Monthly Bleed)
+monthly_carry = property_taxes + insurance + utilities
+total_holding_cost = monthly_carry * holding_period
+
+# 5. Sale
+selling_costs_amount = arv * (selling_costs_pct / 100)
+
+# 6. Final Profitability
+# Note: Net Profit is ARV minus ALL costs (Buying + Rehab + Holding + Selling)
+net_profit = arv - (purchase_price + buying_costs_amount + total_rehab_budget + total_finance_cost + total_holding_cost + selling_costs_amount)
+
+# 7. Cash Requirements (Liquidity Needed)
+# Cash Needed = Down Payment + Buying Costs + Loan Points + Rehab + Holding Costs
+# (Assumes Rehab and Holding are paid out of pocket. If financed, remove them here.)
+total_cash_needed = down_payment_amount + buying_costs_amount + points_amount + total_rehab_budget + total_holding_cost
+
+# 8. ROI
+roi = (net_profit / total_cash_needed) * 100 if total_cash_needed > 0 else 0
+annualized_roi = (roi / holding_period) * 12 if holding_period > 0 else 0
 
 
-# ================= FLIP CALCULATIONS (ENHANCED) =================
-    # ================= FLIP CALCULATIONS (CLEAN & SAFE) =================
-if st.session_state.flip_analyzed:
+# ================= OUTPUTS =================
+st.divider()
 
-    # 1️⃣ Buying & Selling Costs
-    buying_costs = flip_purchase_price * 0.025  # estimated title/escrow/origination
-    selling_costs = flip_arv * flip_selling_cost_pct
+# Top Level Metrics
+m1, m2, m3, m4 = st.columns(4)
+m1.metric("Net Profit", f"${net_profit:,.0f}")
+m2.metric("ROI", f"{roi:.1f}%")
+m3.metric("Annualized ROI", f"{annualized_roi:.1f}%")
+m4.metric("Cash Needed", f"${total_cash_needed:,.0f}", help="Total cash required (Down Pmt + Rehab + Holding + Closing)")
 
-    # 2️⃣ Estimated Monthly Holding Costs
-    # Includes property tax, insurance, utilities (assumption-based)
-    estimated_monthly_holding = ((flip_arv * 0.015) / 12) + 250
-    total_holding_costs = estimated_monthly_holding * flip_holding_months
+st.divider()
 
-    # 3️⃣ Total Project Cost
-    total_project_cost = (
-        flip_purchase_price
-        + flip_rehab_cost
-        + buying_costs
-        + flip_financing_costs
-        + flip_misc_costs
-        + total_holding_costs
-        + selling_costs
-    )
+# Detailed Breakdown
+b1, b2 = st.columns([1, 1])
 
-    # 4️⃣ Profit & Returns
-    net_profit = flip_arv - total_project_cost
-
-    roi = net_profit / total_project_cost if total_project_cost else 0
-    annualized_roi = (roi / flip_holding_months) * 12 if flip_holding_months else 0
-    profit_margin = net_profit / flip_arv if flip_arv else 0
-
-    # 5️⃣ 70% Rule – Maximum Allowable Offer
-    mao_70_rule = (flip_arv * 0.70) - flip_rehab_cost
-
-    # 6️⃣ Flip Deal Score (0–100)
-    # Weighting:
-    # 40% ROI (target 20%)
-    # 30% Profit Margin (target 15%)
-    # 30% 70% Rule Compliance
-
-    rule_adherence = mao_70_rule / flip_purchase_price if flip_purchase_price else 0
-
-    flip_score_raw = (
-        (roi / 0.20 * 40) +
-        (profit_margin / 0.15 * 30) +
-        (min(1.0, rule_adherence) * 30)
-    )
-
-    # Risk penalty for heavy rehab
-    if flip_rehab_cost > (flip_purchase_price * 0.5):
-        flip_score_raw -= 5
-
-    flip_score = max(0, min(100, flip_score_raw))
-
-    flip_rating = (
-        "🔥 Home Run Flip" if flip_score >= 85 else
-        "✅ Solid Flip" if flip_score >= 70 else
-        "⚠️ High Risk / Marginal" if flip_score >= 50 else
-        "❌ Avoid Deal"
-    )
-
-    # 7️⃣ Store Results (EXPORT-SAFE)
-    st.session_state.flip_results = {
-        "Purchase Price": flip_purchase_price,
-        "Rehab Cost": flip_rehab_cost,
-        "After Repair Value (ARV)": flip_arv,
-        "Holding Period (Months)": flip_holding_months,
-        "Estimated Buying Costs": buying_costs,
-        "Total Holding Costs": total_holding_costs,
-        "Financing Costs": flip_financing_costs,
-        "Misc / Contingency": flip_misc_costs,
-        "Selling Costs": selling_costs,
-        "Total Project Cost": total_project_cost,
-        "Net Profit": net_profit,
-        "ROI": roi,
-        "Annualized ROI": annualized_roi,
-        "Profit Margin": profit_margin,
-        "Max Allowable Offer (70% Rule)": mao_70_rule,
-        "Flip Deal Score": flip_score,
-        "Rating": flip_rating
+with b1:
+    st.subheader("💵 Expense Breakdown")
+    breakdown_data = {
+        "Category": [
+            "Purchase Price",
+            "Buying Closing Costs",
+            "Rehab (w/ Contingency)",
+            "Financing (Points + Int)",
+            "Holding (Tax/Ins/Util)",
+            "Selling Costs"
+        ],
+        "Amount": [
+            purchase_price,
+            buying_costs_amount,
+            total_rehab_budget,
+            total_finance_cost,
+            total_holding_cost,
+            selling_costs_amount
+        ]
     }
-
-    # ================= MIDDLE COLUMN — FLIP RESULTS =================
-    with fcol2:
-        st.header("📈 Flip Results")
-
-        if "flip_results" in st.session_state:
-            r = st.session_state.flip_results
-            st.metric("Net Profit", f"${r['Net Profit']:,.0f}")
-            st.metric("ROI", f"{r['ROI']:.2%}")
-            st.metric("Annualized ROI", f"{r['Annualized ROI']:.2%}")
-            st.metric("Profit Margin", f"{r['Profit Margin']:.2%}")
-            st.metric("Flip Deal Score", f"{r['Flip Deal Score']:.0f}/100")
-            st.subheader(r["Rating"])
-        else:
-            st.info("Enter inputs and click **Analyze Flip**")
-
-    # ================= RIGHT COLUMN — COST BREAKDOWN =================
-    with fcol3:
-        st.header("💸 Cost Breakdown")
-
-        if "flip_results" in st.session_state:
-            r = st.session_state.flip_results
-            st.write(f"Purchase Price: ${r['Purchase Price']:,.0f}")
-            st.write(f"Rehab Cost: ${r['Rehab Cost']:,.0f}")
-            st.write(f"Financing Costs: ${r['Financing Costs']:,.0f}")
-            st.write(f"Misc / Contingency: ${r['Misc / Contingency']:,.0f}")
-            st.write(f"Selling Costs: ${r['Selling Costs']:,.0f}")
-            st.markdown("---")
-            st.write(f"**Total Project Cost:** ${r['Total Project Cost']:,.0f}")
-            st.write(f"**ARV:** ${r['After Repair Value (ARV)']:,.0f}")
-
-    # ================= FLIP DOWNLOAD BUTTONS (MATCH RENTAL STYLE) =================
-    if "flip_results" in st.session_state:
-        export_excel_pdf(
-            st.session_state.flip_results,
-            flip_excel_btn,
-            flip_pdf_btn,
-            excel_filename="flip_deal_analysis.xlsx",
-            pdf_filename="flip_deal_analysis.pdf"
-        )
-
-    # ================= DISCLAIMER =================
-    st.markdown("---")
-    st.caption(
-        "Disclaimer: This tool is for educational and informational purposes only and does not "
-        "constitute financial, investment, legal, tax, or real estate advice. "
-        "All outputs are estimates, and use of this tool is at your own risk."
+    df = pd.DataFrame(breakdown_data)
+    st.dataframe(
+        df.style.format({"Amount": "${:,.0f}"}), 
+        hide_index=True, 
+        use_container_width=True
     )
+
+with b2:
+    st.subheader("📊 Visuals & Rules")
+    
+    # 70% Rule Check
+    mao_70_rule = (arv * 0.70) - total_rehab_budget
+    st.info(f"**Max Allowable Offer (70% Rule):** ${mao_70_rule:,.0f}")
+    
+    # Simple Bar Chart of Expenses (excluding Purchase Price to see "Soft Costs" better)
+    chart_df = df[df["Category"] != "Purchase Price"].set_index("Category")
+    st.bar_chart(chart_df)
+
+# ================= DISCLAIMER =================
+st.markdown("---")
+current_year = datetime.datetime.now().year
+st.markdown(
+    f"""
+    <div style="text-align: center; color: rgba(255,255,255,0.45); font-size: 12px; margin-top: 20px;">
+        © {current_year} RentalDealAnalyzer.com <br>
+        Educational purposes only. This tool does not constitute financial, investment, legal, or real estate advice. 
+        All outputs are estimates. Use of this tool is at your own risk.
+    </div>
+    """,
+    unsafe_allow_html=True
+)
