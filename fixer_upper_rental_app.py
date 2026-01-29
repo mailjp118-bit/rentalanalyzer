@@ -488,31 +488,44 @@ def update_buy_close_from_dollar():
 
     # ================= LEFT COLUMN — FLIP INPUTS (ALL MISSING ADDED) =================
     with fcol1:
-        st.header("🔢 Flip Inputs")
+    st.header("🔢 Flip Inputs")
 
-        st.subheader("Acquisition & Purchase")
-        flip_purchase_price = st.number_input("Purchase Price ($)", min_value=0, step=1000, value=0, key="flip_purchase_price")
+    st.subheader("Acquisition & Purchase")
 
-        flip_buy_close_pct = st.number_input(
-    "Buying Closing Costs (% of Purchase Price)",
-    min_value=0.0,
-    max_value=15.0,
-    step=0.25,
-    format="%.2f",
-    key="flip_buy_close_pct_input",
-    on_change=update_buy_close_from_pct
-) / 100
+    flip_purchase_price = st.number_input(
+        "Purchase Price ($)",
+        min_value=0,
+        step=1000,
+        value=0,
+        key="flip_purchase_price"
+    )
 
-flip_buy_close_fixed = st.number_input(
-    "Buying Closing Costs ($)",
-    min_value=0,
-    step=100,
-    key="flip_buy_close_dollar_input",
-    on_change=update_buy_close_from_dollar
-)
+    flip_buy_close_pct = st.number_input(
+        "Buying Closing Costs (% of Purchase Price)",
+        min_value=0.0,
+        max_value=15.0,
+        value=2.50,
+        step=0.25,
+        format="%.2f",
+        key="flip_buy_close_pct"
+    ) / 100
 
+    flip_buy_close_fixed = st.number_input(
+        "Buying Closing Costs ($)",
+        min_value=0,
+        step=100,
+        value=0,
+        key="flip_buy_close_fixed"
+    )
 
-        flip_inspection_appraisal = st.number_input("Inspection & Appraisal Fees ($)", min_value=0, step=50, value=0, key="flip_inspection_appraisal")
+    flip_inspection_appraisal = st.number_input(
+        "Inspection & Appraisal Fees ($)",
+        min_value=0,
+        step=50,
+        value=0,
+        key="flip_inspection_appraisal"
+    )
+
 
         st.subheader("Renovation & Rehab")
         flip_rehab_budget = st.number_input("Estimated Rehab Budget ($)", min_value=0, step=1000, value=0, key="flip_rehab_budget")
