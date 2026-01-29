@@ -469,7 +469,7 @@ Get **profit, ROI, annualized ROI, break-even price, and total project cost** in
         st.session_state.flip_analyzed = False
 
     if "flip_buy_close_dollar" not in st.session_state:
-    st.session_state.flip_buy_close_dollar = 0.0
+        st.session_state.flip_buy_close_dollar = 0.0
 def update_buy_close_from_pct():
     st.session_state.flip_buy_close_dollar = (
         st.session_state.flip_purchase_price *
