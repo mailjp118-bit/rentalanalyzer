@@ -412,7 +412,6 @@ Get **cash flow, cap rate, cash-on-cash return, deal score and much more** insta
         "constitute financial, investment, legal, tax, or real estate advice. "
         "All outputs are estimates, and use of this tool is at your own risk."
     )
-
 # =====================================================================
 # ============================ FLIP TAB ================================
 # =====================================================================
@@ -470,64 +469,63 @@ Get **profit, ROI, annualized ROI, break-even price, and total project cost** in
 
     if "flip_buy_close_dollar" not in st.session_state:
         st.session_state.flip_buy_close_dollar = 0.0
-def update_buy_close_from_pct():
-    st.session_state.flip_buy_close_dollar = (
-        st.session_state.flip_purchase_price *
-        (st.session_state.flip_buy_close_pct_input / 100)
-    )
 
-def update_buy_close_from_dollar():
-    if st.session_state.flip_purchase_price > 0:
-        st.session_state.flip_buy_close_pct_input = (
-            st.session_state.flip_buy_close_dollar_input /
-            st.session_state.flip_purchase_price * 100
+    def update_buy_close_from_pct():
+        st.session_state.flip_buy_close_dollar = (
+            st.session_state.flip_purchase_price *
+            (st.session_state.flip_buy_close_pct_input / 100)
         )
-    else:
-        st.session_state.flip_buy_close_pct_input = 0.0
 
+    def update_buy_close_from_dollar():
+        if st.session_state.flip_purchase_price > 0:
+            st.session_state.flip_buy_close_pct_input = (
+                st.session_state.flip_buy_close_dollar_input /
+                st.session_state.flip_purchase_price * 100
+            )
+        else:
+            st.session_state.flip_buy_close_pct_input = 0.0
 
     # ================= LEFT COLUMN — FLIP INPUTS (ALL MISSING ADDED) =================
-with fcol1:
-    st.header("🔢 Flip Inputs")
+    with fcol1:
+        st.header("🔢 Flip Inputs")
 
-    st.subheader("Acquisition & Purchase")
+        st.subheader("Acquisition & Purchase")
 
-    flip_purchase_price = st.number_input(
-        "Purchase Price ($)",
-        min_value=0,
-        step=1000,
-        value=0,
-        key="flip_purchase_price"
-    )
+        flip_purchase_price = st.number_input(
+            "Purchase Price ($)",
+            min_value=0,
+            step=1000,
+            value=0,
+            key="flip_purchase_price"
+        )
 
-    flip_buy_close_pct = st.number_input(
-        "Buying Closing Costs (% of Purchase Price)",
-        min_value=0.0,
-        max_value=15.0,
-        value=2.50,
-        step=0.25,
-        format="%.2f",
-        key="flip_buy_close_pct"
-    ) / 100
+        flip_buy_close_pct = st.number_input(
+            "Buying Closing Costs (% of Purchase Price)",
+            min_value=0.0,
+            max_value=15.0,
+            value=2.50,
+            step=0.25,
+            format="%.2f",
+            key="flip_buy_close_pct"
+        ) / 100
 
-    flip_buy_close_fixed = st.number_input(
-        "Buying Closing Costs ($)",
-        min_value=0,
-        step=100,
-        value=0,
-        key="flip_buy_close_fixed"
-    )
+        flip_buy_close_fixed = st.number_input(
+            "Buying Closing Costs ($)",
+            min_value=0,
+            step=100,
+            value=0,
+            key="flip_buy_close_fixed"
+        )
 
-    flip_inspection_appraisal = st.number_input(
-        "Inspection & Appraisal Fees ($)",
-        min_value=0,
-        step=50,
-        value=0,
-        key="flip_inspection_appraisal"
-    )
+        flip_inspection_appraisal = st.number_input(
+            "Inspection & Appraisal Fees ($)",
+            min_value=0,
+            step=50,
+            value=0,
+            key="flip_inspection_appraisal"
+        )
 
-
-    st.subheader("Renovation & Rehab")
+        st.subheader("Renovation & Rehab")
         flip_rehab_budget = st.number_input("Estimated Rehab Budget ($)", min_value=0, step=1000, value=0, key="flip_rehab_budget")
         flip_contingency_pct = st.number_input("Misc / Contingency (%)", min_value=0.0, max_value=30.0, value=10.0, step=1.0, format="%.1f", key="flip_contingency_pct") / 100
         flip_permit_arch_fees = st.number_input("Permit & Architectural Fees ($)", min_value=0, step=100, value=0, key="flip_permit_arch_fees")
