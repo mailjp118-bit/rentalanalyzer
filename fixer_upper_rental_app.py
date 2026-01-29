@@ -372,7 +372,7 @@ Get **cash flow, cap rate, cash-on-cash return, deal score and much more** insta
                 st.metric("Debt Service", f"${r['Debt Monthly']:,.0f}", help="Monthly mortgage payment (principal + interest).")
 
             st.metric("Cap Rate", f"{r['Cap Rate']:.2%}", help="NOI divided by total investment cost.")
-            st.metric("Cash-on-Cash Return", f"{r['CoC']:.2%}", help="Annual cash flow divided by total_investment.")
+            st.metric("Cash-on-Cash Return", f"{r['CoC']:.2%}", help="Annual cash flow divided by total_cash_needed.")
             st.metric("Equity %", f"{r['Equity']:.2%}", help="Percentage of property value owned after purchase and rehab.")
             st.metric("Rental Deal Score", f"{r['Score']:.0f}/100", help="Overall deal strength score based on returns and equity.")
             st.subheader(r["Rating"])
