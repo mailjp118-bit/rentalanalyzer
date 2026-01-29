@@ -490,7 +490,7 @@ Get **profit, ROI, annualized ROI, break-even price, and total project cost** in
         flip_ins_mo = st.number_input("Insurance ($/month)", min_value=0, step=50, value=0, key="flip_ins_mo")
         flip_utils_mo = st.number_input("Utilities ($/month)", min_value=0, step=50, value=0, key="flip_utils_mo")
         flip_hoa_mo = st.number_input("HOA Fees ($/month)", min_value=0, step=25, value=0, key="flip_hoa_mo")
-        flip_yard_pool_mo = st.number_input("Yard/Pool Maintenance ($/month)", min_value=0, step=25, value=0, key="flip_yard_pool_mo")
+        #flip_yard_pool_mo = st.number_input("Yard/Pool Maintenance ($/month)", min_value=0, step=25, value=0, key="flip_yard_pool_mo")
 
         st.subheader("Financing (If using a loan)")
         flip_down_payment_pct = st.number_input("Down Payment (%)", min_value=0.0, max_value=100.0, value=20.0, step=1.0, format="%.1f", key="flip_down_payment_pct") / 100
