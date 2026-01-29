@@ -527,7 +527,7 @@ with fcol1:
     )
 
 
-        st.subheader("Renovation & Rehab")
+    st.subheader("Renovation & Rehab")
         flip_rehab_budget = st.number_input("Estimated Rehab Budget ($)", min_value=0, step=1000, value=0, key="flip_rehab_budget")
         flip_contingency_pct = st.number_input("Misc / Contingency (%)", min_value=0.0, max_value=30.0, value=10.0, step=1.0, format="%.1f", key="flip_contingency_pct") / 100
         flip_permit_arch_fees = st.number_input("Permit & Architectural Fees ($)", min_value=0, step=100, value=0, key="flip_permit_arch_fees")
