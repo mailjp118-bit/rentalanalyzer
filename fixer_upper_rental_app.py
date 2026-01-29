@@ -514,7 +514,7 @@ Get **profit, ROI, annualized ROI, break-even price, and total project cost** in
         buying_closing_costs = (flip_purchase_price * flip_buy_close_pct) + flip_buy_close_fixed
         contingency_cost = flip_rehab_budget * flip_contingency_pct
 
-        monthly_carry = flip_tax_mo + flip_ins_mo + flip_utils_mo + flip_hoa_mo + flip_yard_pool_mo
+        monthly_carry = flip_tax_mo + flip_ins_mo + flip_utils_mo + flip_hoa_mo
         total_carry = monthly_carry * flip_holding_months
 
         down_payment_amt = flip_purchase_price * flip_down_payment_pct
