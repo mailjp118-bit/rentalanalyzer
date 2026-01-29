@@ -487,7 +487,7 @@ def update_buy_close_from_dollar():
 
 
     # ================= LEFT COLUMN — FLIP INPUTS (ALL MISSING ADDED) =================
-    with fcol1:
+with fcol1:
     st.header("🔢 Flip Inputs")
 
     st.subheader("Acquisition & Purchase")
