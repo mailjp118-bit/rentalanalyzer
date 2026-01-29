@@ -307,8 +307,7 @@ Get **cash flow, cap rate, cash-on-cash return, deal score and much more** insta
         cash_invested = purchase_price * down_payment_pct + rehab_cost
 
         cap_rate = noi_annual / total_investment if total_investment else 0
-        #coc_return = cash_flow_annual / cash_invested if cash_invested else 0
-        coc_return = cash_flow_annual / total_investment if total_investment else 0
+        coc_return = cash_flow_annual / cash_invested if cash_invested else 0
         equity_pct = (arv - total_investment) / arv if arv else 0
 
         deal_score = min(
@@ -591,4 +590,5 @@ Get **profit, ROI, annualized ROI, selling costs, and flip score** instantly.
         "constitute financial, investment, legal, tax, or real estate advice. "
         "All outputs are estimates, and use of this tool is at your own risk."
     )
+
 
