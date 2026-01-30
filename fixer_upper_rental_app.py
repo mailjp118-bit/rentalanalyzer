@@ -313,7 +313,7 @@ Get **cash flow, cap rate, cash-on-cash return, deal score and much more** insta
         cash_invested = purchase_price * down_payment_pct + rehab_cost + closing_cost_pct
 
         cap_rate = noi_annual / total_investment if total_investment else 0
-        coc_return = cash_flow_annual / cash_invested if cash_invested else 0
+        coc_return = cash_flow_annual / total_cash_needed if total_cash_needed else 0
         equity_pct = (arv - total_investment) / arv if arv else 0
 
         deal_score = min(
