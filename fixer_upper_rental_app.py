@@ -310,7 +310,11 @@ Get **cash flow, cap rate, cash-on-cash return, deal score and much more** insta
         cash_flow_annual = noi_annual - annual_debt
 
         total_investment = purchase_price + rehab_cost
-        cash_invested = purchase_price * down_payment_pct + rehab_cost + closing_cost_pct
+        cash_invested = purchase_price * down_payment_pct + rehab_cost
+        down_payment = purchase_price * down_payment_pct
+        closing_costs = purchase_price * closing_cost_pct
+        total_cash_needed = down_payment + rehab_cost + closing_costs
+        cash_pct_arv = total_cash_needed / arv if arv else 0
 
         cap_rate = noi_annual / total_investment if total_investment else 0
         coc_return = cash_flow_annual / total_cash_needed if total_cash_needed else 0
@@ -329,11 +333,6 @@ Get **cash flow, cap rate, cash-on-cash return, deal score and much more** insta
             "⚠️ Marginal Deal" if deal_score >= 50 else
             "❌ Weak Deal"
         )
-
-        down_payment = purchase_price * down_payment_pct
-        closing_costs = purchase_price * closing_cost_pct
-        total_cash_needed = down_payment + rehab_cost + closing_costs
-        cash_pct_arv = total_cash_needed / arv if arv else 0
 
         st.session_state.results = {
             "Annual Rent": annual_rent,
