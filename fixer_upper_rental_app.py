@@ -20,19 +20,20 @@ section.main > div { padding-top: 0 !important; }
 """, unsafe_allow_html=True)
 
 # ================= GOOGLE ANALYTICS =================
-components.html(
-    """
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DMLKRR0K9P"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-DMLKRR0K9P', { 'send_page_view': true });
-    </script>
-    """,
-    height=0,
-)
+#components.html(
+    #"""
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DMLKRR0K9P"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-DMLKRR0K9P');
+</script>
+    #""",
+    #height=0,
+#)
 
 # ================= EXPORT HELPERS (USED BY RENTAL + FLIP) =================
 LOGO_PATH = "assets/logo2.png"
