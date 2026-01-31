@@ -22,7 +22,7 @@ section.main > div { padding-top: 0 !important; }
 # ================= GOOGLE ANALYTICS =================
 #components.html(
     #"""
-  <!-- Google tag (gtag.js) -->
+<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DMLKRR0K9P"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
