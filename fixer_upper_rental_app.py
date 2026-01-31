@@ -476,7 +476,7 @@ Get **profit, ROI, annualized ROI, break-even price, and total project cost** in
         flip_purchase_price = st.number_input("Purchase Price ($)", min_value=0, step=1000, value=0, key="flip_purchase_price")
 
         flip_buy_close_pct = st.number_input("Buying Closing Costs (% of Purchase Price)", min_value=0.0, max_value=15.0, value=2.50, step=0.25, format="%.2f", key="flip_buy_close_pct") / 100
-        flip_buy_close_fixed = st.number_input("Buying Closing Costs ($)", min_value=0, step=100, value=0, key="flip_buy_close_fixed")
+        #flip_buy_close_fixed = st.number_input("Buying Closing Costs ($)", min_value=0, step=100, value=0, key="flip_buy_close_fixed")
 
         flip_inspection_appraisal = st.number_input("Inspection & Appraisal Fees ($)", min_value=0, step=50, value=0, key="flip_inspection_appraisal")
 
@@ -511,7 +511,7 @@ Get **profit, ROI, annualized ROI, break-even price, and total project cost** in
 
     # ================= FLIP CALCULATIONS (SAFE + COMPLETE) =================
     if analyze_flip:
-        buying_closing_costs = (flip_purchase_price * flip_buy_close_pct) + flip_buy_close_fixed
+        buying_closing_costs = (flip_purchase_price * flip_buy_close_pct) 
         contingency_cost = flip_rehab_budget * flip_contingency_pct
 
         monthly_carry = flip_tax_mo + flip_ins_mo + flip_utils_mo + flip_hoa_mo
