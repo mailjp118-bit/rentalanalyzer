@@ -497,7 +497,7 @@ Get **profit, ROI, annualized ROI, break-even price, and total project cost** in
         flip_interest_rate = st.number_input("Interest Rate (Annual %)", min_value=0.0, max_value=25.0, value=12.0, step=0.25, format="%.2f", key="flip_interest_rate") / 100
 
         flip_points_pct = st.number_input("Loan Points / Origination Fees (% of Loan)", min_value=0.0, max_value=10.0, value=2.0, step=0.25, format="%.2f", key="flip_points_pct") / 100
-        flip_points_fixed = st.number_input("Loan Points / Origination Fees ($)", min_value=0, step=100, value=0, key="flip_points_fixed")
+        #flip_points_fixed = st.number_input("Loan Points / Origination Fees ($)", min_value=0, step=100, value=0, key="flip_points_fixed")
 
         flip_holding_months = st.number_input("Projected Holding Period (Months)", min_value=1, step=1, value=6, key="flip_holding_months")
 
@@ -523,7 +523,7 @@ Get **profit, ROI, annualized ROI, break-even price, and total project cost** in
         monthly_interest_payment = loan_amount * (flip_interest_rate / 12) if loan_amount > 0 else 0.0
         total_interest_paid = monthly_interest_payment * flip_holding_months
 
-        points_cost = (loan_amount * flip_points_pct) + flip_points_fixed
+        points_cost = (loan_amount * flip_points_pct)
 
         selling_commission = flip_arv * flip_sell_cost_pct
         selling_fixed = flip_seller_concessions + flip_staging_photo
